@@ -68,6 +68,8 @@
     background: #0a0a0a !important;
     font-family: 'Inter', system-ui, sans-serif;
     overflow-x: hidden;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
   }
 
   /* Custom scrollbar */
@@ -90,15 +92,51 @@
 }
 
 @layer components {
+  /* Wider, more appealing layout styles */
+  .container-wide {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 5vw, 4rem);
+  }
+  
+  .container-ultrawide {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 6vw, 5rem);
+  }
+  
+  .card-enhanced {
+    background: hsl(0, 0%, 6%);
+    border: 1px solid hsl(0, 0%, 15%);
+    border-radius: 16px;
+    padding: clamp(1.5rem, 3vw, 2rem);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  
+  .card-enhanced:hover {
+    background: hsl(0, 0%, 8%);
+    border-color: hsl(353, 68%, 32%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(122, 25, 39, 0.15);
+  }
+
   .gradient-border {
-    background: linear-gradient(90deg, #7A1927, #ff6b6b);
-    border-radius: 12px;
-    padding: 1px;
+    background: linear-gradient(135deg, #7A1927, #ff6b6b, #7A1927);
+    border-radius: 16px;
+    padding: 2px;
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+  }
+  
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
 
   .gradient-border > div {
-    background: #1a1a1a;
-    border-radius: 11px;
+    background: #0f0f0f;
+    border-radius: 14px;
   }
 
   .progress-bar {
