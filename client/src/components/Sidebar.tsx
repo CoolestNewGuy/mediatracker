@@ -30,7 +30,7 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
       {/* Logo/Header */}
       <div className="p-6 border-b border-gray-700">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-primary-red rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
             <Film className="text-white text-lg" />
           </div>
           <div>
@@ -43,18 +43,18 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
       {/* Navigation Menu */}
       <nav className="p-4">
         <div className="space-y-2">
-          <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-white bg-primary-red">
+          <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-white bg-red-500">
             <ChartLine size={16} />
             <span>Dashboard</span>
           </a>
           <button 
             onClick={onAddMedia}
-            className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-primary-red transition-all duration-200"
+            className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200"
           >
             <Plus size={16} />
             <span>Add Media</span>
           </button>
-          <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-primary-red transition-all duration-200">
+          <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200">
             <Search size={16} />
             <span>Search All</span>
           </a>
@@ -70,9 +70,9 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
                 <a 
                   key={type.name}
                   href="#" 
-                  className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-primary-red transition-all duration-200"
+                  className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200"
                 >
-                  <Icon size={16} />
+                  <Icon size={16} className="text-red-500" />
                   <span>{type.name}</span>
                   <span className="ml-auto bg-surface-2 px-2 py-1 rounded text-xs">
                     {type.count}
@@ -94,9 +94,9 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
                   <a 
                     key={type.name}
                     href="#" 
-                    className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-primary-red transition-all duration-200"
+                    className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200"
                   >
-                    <Icon size={16} />
+                    <Icon size={16} className="text-red-500" />
                     <span>{type.name}</span>
                     <span className="ml-auto bg-surface-2 px-2 py-1 rounded text-xs">
                       {type.count}
@@ -114,19 +114,19 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
           <div className="space-y-1">
             <button 
               onClick={onViewCatalog}
-              className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-primary-red transition-all duration-200"
+              className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200"
             >
               <Grid size={16} />
               <span>View Catalog</span>
             </button>
             <button 
               onClick={onQuickUpdate}
-              className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-primary-red transition-all duration-200"
+              className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200"
             >
               <Clock size={16} />
               <span>Quick Update</span>
             </button>
-            <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-primary-red transition-all duration-200">
+            <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200">
               <Trophy size={16} />
               <span>Achievements</span>
             </a>
@@ -136,11 +136,11 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
         {/* Settings */}
         <div className="mt-6">
           <div className="space-y-1">
-            <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-primary-red transition-all duration-200">
+            <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200">
               <Settings size={16} />
               <span>Settings</span>
             </a>
-            <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-primary-red transition-all duration-200">
+            <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200">
               <Download size={16} />
               <span>Export Data</span>
             </a>
