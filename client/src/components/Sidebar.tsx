@@ -77,30 +77,7 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
           </div>
         </div>
 
-        {/* Additional Media Types (only show if they have content) */}
-        {additionalTypes.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Additional</h3>
-            <div className="space-y-1">
-              {additionalTypes.map((type) => {
-                const Icon = type.icon;
-                return (
-                  <a 
-                    key={type.name}
-                    href="#" 
-                    className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200"
-                  >
-                    <Icon size={16} className="text-red-500" />
-                    <span>{type.name}</span>
-                    <span className="ml-auto bg-surface-2 px-2 py-1 rounded text-xs">
-                      {type.count}
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        )}
+
 
         {/* Quick Actions */}
         <div className="mt-6">
