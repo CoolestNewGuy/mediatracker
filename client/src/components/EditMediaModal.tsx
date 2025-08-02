@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,13 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Search, Tags, X } from "lucide-react";
-import MediaSearch from "@/components/MediaSearch";
-import GenreSelector from "@/components/GenreSelector";
-import type { InsertMediaItem } from "@shared/schema";
+import type { InsertMediaItem, MediaItem } from "@shared/schema";
 
-interface AddMediaModalProps {
+interface EditMediaModalProps {
   isOpen: boolean;
   onClose: () => void;
+  mediaItem: MediaItem | null;
 }
 
 // Media types based on your Google Sheets specifications
@@ -27,7 +26,7 @@ const genres = [
   'Sports', 'Supernatural', 'Historical'
 ];
 
-export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
+export default function EditMediaModal({ isOpen, onClose, mediaItem }: EditMediaModalProps) {
   const [formData, setFormData] = useState<Partial<InsertMediaItem>>({
     title: '',
     type: '',
@@ -44,35 +43,80 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
   });
   
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isGenreModalOpen, setIsGenreModalOpen] = useState(false);
-  const [showProgressFields, setShowProgressFields] = useState(false);
   const [autoSearchResults, setAutoSearchResults] = useState<any[]>([]);
   const [showAutoSearch, setShowAutoSearch] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const addMediaMutation = useMutation({
-    mutationFn: async (data: InsertMediaItem) => {
-      const response = await apiRequest('POST', '/api/media', data);
+  // Populate form with existing data when modal opens
+  useEffect(() => {
+    if (mediaItem && isOpen) {
+      setFormData({
+        title: mediaItem.title,
+        type: mediaItem.type,
+        status: mediaItem.status,
+        genre: mediaItem.genre || '',
+        notes: mediaItem.notes || '',
+        season: mediaItem.season || 1,
+        episode: mediaItem.episode || 0,
+        chapter: mediaItem.chapter || 0,
+        imageUrl: mediaItem.imageUrl || '',
+        description: mediaItem.description || '',
+        externalId: mediaItem.externalId || '',
+        releaseYear: mediaItem.releaseYear || undefined,
+      });
+      
+      // Set genres from existing data
+      if (mediaItem.genre) {
+        setSelectedGenres(mediaItem.genre.split(', ').filter(g => g.trim()));
+      } else {
+        setSelectedGenres([]);
+      }
+    }
+  }, [mediaItem, isOpen]);
+
+  // Auto-search when typing 3+ characters
+  useEffect(() => {
+    if (formData.title && formData.title.length >= 3 && formData.type) {
+      const timer = setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/search-external?query=${encodeURIComponent(formData.title!)}&type=${encodeURIComponent(formData.type!)}`);
+          const results = await response.json();
+          setAutoSearchResults(results);
+          setShowAutoSearch(results.length > 0);
+        } catch (error) {
+          console.error('Auto-search error:', error);
+          setShowAutoSearch(false);
+        }
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setShowAutoSearch(false);
+    }
+  }, [formData.title, formData.type]);
+
+  const updateMediaMutation = useMutation({
+    mutationFn: async (data: Partial<InsertMediaItem>) => {
+      const response = await apiRequest('PATCH', `/api/media/${mediaItem?.id}`, data);
       return response.json();
     },
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Media added successfully!",
+        description: "Media updated successfully!",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/recent'] });
       queryClient.invalidateQueries({ queryKey: ['/api/media'] });
       onClose();
-      resetForm();
     },
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to add media. Please try again.",
+        description: "Failed to update media. Please try again.",
         variant: "destructive",
       });
     },
@@ -94,43 +138,8 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
       releaseYear: undefined,
     });
     setSelectedGenres([]);
-    setShowProgressFields(false);
-    setAutoSearchResults([]);
     setShowAutoSearch(false);
   };
-
-  // Auto search when title is 3+ characters
-  useEffect(() => {
-    const performAutoSearch = async () => {
-      if (formData.title && formData.title.length >= 3 && formData.type) {
-        try {
-          const response = await fetch(`/api/external-search?query=${encodeURIComponent(formData.title)}&type=${encodeURIComponent(formData.type)}`);
-          const results = await response.json();
-          setAutoSearchResults(results.slice(0, 5)); // Show max 5 results
-          setShowAutoSearch(results.length > 0);
-        } catch (error) {
-          console.error('Auto search error:', error);
-          setShowAutoSearch(false);
-        }
-      } else {
-        setShowAutoSearch(false);
-      }
-    };
-
-    const timeoutId = setTimeout(performAutoSearch, 300); // Debounce
-    return () => clearTimeout(timeoutId);
-  }, [formData.title, formData.type]);
-
-  // Show progress fields when status is selected and it's "In Progress"
-  useEffect(() => {
-    if (formData.status === 'In Progress') {
-      setShowProgressFields(true);
-    } else {
-      setShowProgressFields(false);
-    }
-  }, [formData.status]);
-
-
 
   const handleGenresChange = (genres: string[]) => {
     setSelectedGenres(genres);
@@ -190,7 +199,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
       }
     }
 
-    const submitData: InsertMediaItem = {
+    const submitData: Partial<InsertMediaItem> = {
       title: formData.title!,
       type: formData.type!,
       status: formData.status!,
@@ -210,7 +219,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
       releaseYear: formData.releaseYear || null,
     };
 
-    addMediaMutation.mutate(submitData);
+    updateMediaMutation.mutate(submitData);
   };
 
   // Handle auto-search result selection
@@ -230,38 +239,18 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
     }
     
     setShowAutoSearch(false);
-    setIsSearchOpen(false);
   };
-
-  // Auto-search when typing 3+ characters
-  useEffect(() => {
-    if (formData.title && formData.title.length >= 3 && formData.type) {
-      const timer = setTimeout(async () => {
-        try {
-          const response = await fetch(`/api/search-external?query=${encodeURIComponent(formData.title!)}&type=${encodeURIComponent(formData.type!)}`);
-          const results = await response.json();
-          setAutoSearchResults(results);
-          setShowAutoSearch(results.length > 0);
-        } catch (error) {
-          console.error('Auto-search error:', error);
-          setShowAutoSearch(false);
-        }
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    } else {
-      setShowAutoSearch(false);
-    }
-  }, [formData.title, formData.type]);
 
   const showSeasonField = formData.type === 'Anime' || formData.type === 'TV Shows';
   const episodeLabel = ['Manhwa', 'Pornhwa', 'Novels'].includes(formData.type || '') ? 'Chapter' : 'Episode';
+
+  if (!mediaItem) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-surface border-gray-700 max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">➕ Add New Media</DialogTitle>
+          <DialogTitle className="text-xl font-bold">✏️ Edit Media</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -291,22 +280,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
                 className="bg-surface-2 border-gray-600 flex-1"
                 placeholder="Enter media title"
               />
-              {formData.type && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsSearchOpen(true)}
-                  className="bg-[#7A1927] hover:bg-[#9d2332] border-[#7A1927] text-white"
-                >
-                  <Search className="w-4 h-4" />
-                </Button>
-              )}
             </div>
-            {formData.type && (
-              <p className="text-xs text-gray-400 mt-1">
-                Click the search button to find {formData.type.toLowerCase()} from external databases
-              </p>
-            )}
             
             {/* Auto Search Results */}
             {showAutoSearch && (
@@ -345,40 +319,40 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
                 </SelectContent>
               </Select>
             
-            {/* Quick Status Buttons */}
-            {formData.type && (
-              <div className="flex space-x-2 mt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setQuickStatus('planned')}
-                  className="flex-1 bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30"
-                >
-                  Plan to {formData.type === 'Movies' || formData.type === 'Anime' || formData.type === 'TV Shows' ? 'Watch' : 'Read'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setQuickStatus('progress')}
-                  className="flex-1 bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30"
-                >
-                  In Progress
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setQuickStatus('completed')}
-                  className="flex-1 bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30"
-                >
-                  Completed
-                </Button>
-              </div>
+              {/* Quick Status Buttons */}
+              {formData.type && (
+                <div className="flex space-x-2 mt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuickStatus('planned')}
+                    className="flex-1 bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30"
+                  >
+                    Plan to {formData.type === 'Movies' || formData.type === 'Anime' || formData.type === 'TV Shows' ? 'Watch' : 'Read'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuickStatus('progress')}
+                    className="flex-1 bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30"
+                  >
+                    In Progress
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuickStatus('completed')}
+                    className="flex-1 bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30"
+                  >
+                    Completed
+                  </Button>
+                </div>
+              )}
+            </div>
             )}
-          </div>
-          )}
 
           {/* Progress Fields - only show if status is selected and status is "In Progress" */}
           {formData.status === 'In Progress' && (
@@ -431,7 +405,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
                 <Tags className="w-4 h-4 mr-2" />
                 {selectedGenres.length > 0 
                   ? `${selectedGenres.length} genre${selectedGenres.length > 1 ? 's' : ''} selected`
-                  : 'Select genres...'
+                  : 'Select genres'
                 }
               </Button>
               
@@ -441,17 +415,16 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
                     <Badge 
                       key={genre} 
                       variant="secondary" 
-                      className="bg-[#7A1927] text-white"
+                      className="text-xs bg-surface-1 text-gray-300"
                     >
                       {genre}
-                      <X 
-                        className="w-3 h-3 ml-1 cursor-pointer" 
-                        onClick={() => {
-                          const newGenres = selectedGenres.filter(g => g !== genre);
-                          setSelectedGenres(newGenres);
-                          setFormData(prev => ({ ...prev, genre: newGenres.join(', ') }));
-                        }}
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setSelectedGenres(prev => prev.filter(g => g !== genre))}
+                        className="ml-1 hover:text-red-400"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
                     </Badge>
                   ))}
                 </div>
@@ -459,69 +432,123 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
             </div>
           </div>
 
-          {/* Description (from search) */}
-          {formData.description && (
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="bg-surface-2 border-gray-600"
-                rows={3}
-                placeholder="Media description..."
-              />
-            </div>
-          )}
-
           {/* Notes */}
           <div>
-            <Label htmlFor="notes">Notes (Optional)</Label>
+            <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
               value={formData.notes || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               className="bg-surface-2 border-gray-600"
-              placeholder="Any additional notes..."
+              placeholder="Add your thoughts, reviews, or notes..."
               rows={3}
             />
           </div>
 
+          {/* Additional Fields */}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="imageUrl">Image URL</Label>
+              <Input
+                id="imageUrl"
+                value={formData.imageUrl || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
+                className="bg-surface-2 border-gray-600"
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                className="bg-surface-2 border-gray-600"
+                placeholder="Plot summary or description..."
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="releaseYear">Release Year</Label>
+              <Input
+                id="releaseYear"
+                type="number"
+                min="1900"
+                max="2030"
+                value={formData.releaseYear || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, releaseYear: parseInt(e.target.value) || undefined }))}
+                className="bg-surface-2 border-gray-600"
+                placeholder="2023"
+              />
+            </div>
+          </div>
+
           {/* Submit Buttons */}
-          <div className="flex space-x-3 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onClose} 
-              className="flex-1 bg-gray-600 hover:bg-gray-700 border-gray-600"
-            >
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={addMediaMutation.isPending}
-              className="flex-1 bg-primary-red hover:bg-primary-red/90"
+            <Button
+              type="submit"
+              disabled={updateMediaMutation.isPending}
+              className="bg-[#7A1927] hover:bg-[#9d2332]"
             >
-              {addMediaMutation.isPending ? 'Adding...' : 'Add Media'}
+              {updateMediaMutation.isPending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Updating...
+                </>
+              ) : (
+                'Update Media'
+              )}
             </Button>
           </div>
         </form>
-        
-        {/* Search Modal */}
-        <MediaSearch
-          isOpen={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
-          mediaType={formData.type || ''}
-          onSelect={handleSearchResult}
-        />
-        
+
         {/* Genre Selection Modal */}
-        <GenreSelector
-          isOpen={isGenreModalOpen}
-          onClose={() => setIsGenreModalOpen(false)}
-          selectedGenres={selectedGenres}
-          onGenresChange={handleGenresChange}
-        />
+        <Dialog open={isGenreModalOpen} onOpenChange={setIsGenreModalOpen}>
+          <DialogContent className="bg-surface border-gray-700 max-w-md">
+            <DialogHeader>
+              <DialogTitle>Select Genres</DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+              {genres.map((genre) => (
+                <Button
+                  key={genre}
+                  type="button"
+                  variant={selectedGenres.includes(genre) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setSelectedGenres(prev => 
+                      prev.includes(genre) 
+                        ? prev.filter(g => g !== genre)
+                        : [...prev, genre]
+                    );
+                  }}
+                  className={`justify-start ${
+                    selectedGenres.includes(genre) 
+                      ? 'bg-[#7A1927] hover:bg-[#9d2332]' 
+                      : 'bg-surface-2 border-gray-600'
+                  }`}
+                >
+                  {genre}
+                </Button>
+              ))}
+            </div>
+            
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button variant="outline" onClick={() => setSelectedGenres([])}>
+                Clear All
+              </Button>
+              <Button onClick={() => setIsGenreModalOpen(false)}>
+                Done ({selectedGenres.length})
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
