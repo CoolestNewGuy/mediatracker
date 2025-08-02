@@ -32,7 +32,11 @@ export const users = pgTable("users", {
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
+  nickname: varchar("nickname"), // User's custom display name
   profileImageUrl: varchar("profile_image_url"),
+  points: integer("points").default(0), // User's total points/coins
+  lastLoginDate: timestamp("last_login_date"), // Track last login for daily rewards
+  loginStreak: integer("login_streak").default(0), // Current consecutive login days
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -68,9 +72,10 @@ export const mediaItems = pgTable("media_items", {
 export const achievements = pgTable("achievements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
-  type: text("type").notNull(), // collector, streak, genre_master, etc.
+  type: text("type").notNull(), // collector, streak, genre_master, first_library_use, etc.
   title: text("title").notNull(),
   description: text("description").notNull(),
+  pointsReward: integer("points_reward").default(0), // Points earned for this achievement
   unlockedAt: timestamp("unlocked_at").default(sql`now()`),
   metadata: jsonb("metadata"), // additional data like count, streak length, etc.
 });
@@ -87,6 +92,15 @@ export const userStats = pgTable("user_stats", {
   currentStreak: integer("current_streak").default(0),
   longestStreak: integer("longest_streak").default(0),
   lastActivity: timestamp("last_activity").default(sql`now()`),
+});
+
+// Daily login rewards tracking
+export const dailyLoginRewards = pgTable("daily_login_rewards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  day: integer("day").notNull(), // 1-7 for week cycle
+  pointsEarned: integer("points_earned").notNull(),
+  claimedAt: timestamp("claimed_at").default(sql`now()`),
 });
 
 // Relations
@@ -111,10 +125,18 @@ export const userStatsRelations = relations(userStats, ({ one }) => ({
   }),
 }));
 
+export const dailyLoginRewardsRelations = relations(dailyLoginRewards, ({ one }) => ({
+  user: one(users, {
+    fields: [dailyLoginRewards.userId],
+    references: [users.id],
+  }),
+}));
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   mediaItems: many(mediaItems),
   achievements: many(achievements),
   stats: one(userStats),
+  dailyLoginRewards: many(dailyLoginRewards),
 }));
 
 // Insert schemas
@@ -135,6 +157,11 @@ export const insertUserStatsSchema = createInsertSchema(userStats).omit({
   userId: true,
 });
 
+export const insertDailyLoginRewardSchema = createInsertSchema(dailyLoginRewards).omit({
+  id: true,
+  claimedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -144,3 +171,5 @@ export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
+export type DailyLoginReward = typeof dailyLoginRewards.$inferSelect;
+export type InsertDailyLoginReward = z.infer<typeof insertDailyLoginRewardSchema>;

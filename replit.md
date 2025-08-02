@@ -1,8 +1,8 @@
-# Media Tracker
+# MediaTracker
 
 ## Overview
 
-This is a personal media tracking platform designed to help users manage and track their entertainment consumption. The platform focuses on four main media types (Movies, TV Shows, Anime, and Books/Manga) with extensible support for additional categories like novels, manhwa, manhua, pornhwa, etc. The application provides comprehensive tracking capabilities with progress monitoring, statistics, achievements, and planned AI guidance using Claude. Future features include streaming service integration (Netflix, Prime, etc.) and deployment to CoolestNewGuy.xyz domain.
+This is a comprehensive media tracking platform with gamification features designed to help users manage and track their entertainment consumption. The platform focuses on six main media types (Anime, Manhwa, Pornhwa, Novels, Movies, and TV Shows) with a modern, visually appealing UI. The application provides comprehensive tracking capabilities with progress monitoring, statistics, achievements with leaderboards, and a points/coins system with daily login rewards. Key features include Google login integration, right-click context menus, user profiles with nickname editing, and a wider UI design (1600px max-width) for broader appeal.
 
 ## User Preferences
 
@@ -15,12 +15,14 @@ Streaming integration: Netflix, Prime Video, and other major providers (planned)
 Authentication: Replit Auth for secure user sessions (implemented 2025-01-02)
 
 ### Development Focus (Updated 2025-01-02)
-- **Practical over fancy**: Focus on working functionality rather than complex UI
+- **Practical over fancy**: Focus on working functionality with every button working
 - **Performance first**: Optimize images, add pagination, proper indexing
 - **Real APIs**: Use AniList (no key needed), TMDB (free key), avoid mock data
 - **Keyboard shortcuts**: A (add), L (library), Space (quick update), / (search), ? (help)
-- **Quick operations**: Bulk select, fuzzy search, smart continue watching
+- **Quick operations**: Bulk select, fuzzy search, smart continue watching, right-click context menus
 - **Import/Export**: Support MAL XML, AniList JSON, Goodreads CSV formats
+- **Gamification**: Points/coins system, daily login rewards (20→30→50→100→150→200→300), achievements with leaderboards
+- **UI Design**: Wider layout (1600px max-width) with gradient purple/pink branding, image-filled squares in Currently Watched section
 
 ## System Architecture
 
@@ -40,12 +42,13 @@ Authentication: Replit Auth for secure user sessions (implemented 2025-01-02)
 - **Development**: Hot reloading with Vite integration for seamless development experience
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL with tables for users, media items, achievements, user statistics, and sessions
+- **Primary Database**: PostgreSQL with tables for users, media items, achievements, user statistics, sessions, and dailyLoginRewards
 - **Schema Design**: Normalized schema with support for multiple media types, flexible progress tracking, and Replit Auth integration
-- **User Management**: Automatic user creation/update via OpenID Connect claims with profile data storage
+- **User Management**: Automatic user creation/update via OpenID Connect claims with profile data storage, points tracking, and nickname support
 - **Session Storage**: PostgreSQL-backed session store with automatic cleanup and secure cookie management
 - **Connection**: Neon serverless PostgreSQL with WebSocket support for optimal performance
 - **Migrations**: Drizzle Kit for schema migrations and database versioning
+- **Gamification Storage**: Daily login rewards tracking with weekly cycles, user points system, achievement unlocking with timestamps
 
 ### Authentication and Authorization
 - **Session Management**: Replit Auth implementation with secure session handling using PostgreSQL session store

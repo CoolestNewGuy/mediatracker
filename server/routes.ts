@@ -398,6 +398,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Points and Daily Login routes
+  app.post("/api/daily-login", async (req: any, res) => {
+    try {
+      const result = await storage.checkAndClaimDailyLogin(DEFAULT_USER_ID);
+      res.json(result);
+    } catch (error) {
+      console.error('Daily login error:', error);
+      res.status(500).json({ error: 'Failed to claim daily login' });
+    }
+  });
+
+  app.get("/api/user/points", async (req: any, res) => {
+    try {
+      const points = await storage.getUserPoints(DEFAULT_USER_ID);
+      res.json({ points });
+    } catch (error) {
+      console.error('Get points error:', error);
+      res.status(500).json({ error: 'Failed to get points' });
+    }
+  });
+
+  app.patch("/api/user/nickname", async (req: any, res) => {
+    try {
+      const { nickname } = req.body;
+      if (!nickname || nickname.trim().length === 0) {
+        return res.status(400).json({ error: 'Nickname is required' });
+      }
+      const user = await storage.updateUserNickname(DEFAULT_USER_ID, nickname.trim());
+      res.json(user);
+    } catch (error) {
+      console.error('Update nickname error:', error);
+      res.status(500).json({ error: 'Failed to update nickname' });
+    }
+  });
+
+  // Leaderboard routes
+  app.get("/api/leaderboard/:type", async (req: any, res) => {
+    try {
+      const { type } = req.params;
+      const { limit = 10 } = req.query;
+      
+      if (!['points', 'watched', 'read'].includes(type)) {
+        return res.status(400).json({ error: 'Invalid leaderboard type' });
+      }
+      
+      const leaderboard = await storage.getLeaderboard(type as 'points' | 'watched' | 'read', parseInt(limit));
+      res.json(leaderboard);
+    } catch (error) {
+      console.error('Leaderboard error:', error);
+      res.status(500).json({ error: 'Failed to get leaderboard' });
+    }
+  });
+
+  // First library use achievement
+  app.post("/api/achievements/first-library-use", async (req: any, res) => {
+    try {
+      const existingAchievements = await storage.getUserAchievements(DEFAULT_USER_ID);
+      const hasFirstLibraryUse = existingAchievements.some(a => a.type === 'first_library_use');
+      
+      if (!hasFirstLibraryUse) {
+        const achievement = await storage.createAchievement({
+          userId: DEFAULT_USER_ID,
+          type: 'first_library_use',
+          title: 'Library Explorer',
+          description: 'Used the full library for the first time',
+          pointsReward: 50
+        });
+        
+        // Add points for the achievement
+        await storage.addPoints(DEFAULT_USER_ID, 50);
+        
+        res.json({ achievement, newlyUnlocked: true });
+      } else {
+        res.json({ newlyUnlocked: false });
+      }
+    } catch (error) {
+      console.error('First library achievement error:', error);
+      res.status(500).json({ error: 'Failed to check achievement' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

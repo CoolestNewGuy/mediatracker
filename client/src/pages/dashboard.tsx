@@ -1,23 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useKeyboardShortcuts, KeyboardShortcutsHelp } from "@/hooks/useKeyboardShortcuts";
 import Sidebar from "@/components/Sidebar";
 import HeaderBar from "@/components/HeaderBar";
 import StatsCards from "@/components/StatsCards";
 import RecentMediaList from "@/components/RecentMediaList";
-import CurrentlyActive from "@/components/CurrentlyActive";
+import CurrentlyWatched from "@/components/CurrentlyWatched";
 import MediaCatalog from "@/components/MediaCatalog";
 import StatsOverview from "@/components/StatsOverview";
-import CatalogPreview from "@/components/CatalogPreview";
 import SmartCollections from "@/components/SmartCollections";
 import AchievementWidget from "@/components/AchievementWidget";
 import AddMediaModal from "@/components/AddMediaModal";
 import QuickUpdateSidebar from "@/components/QuickUpdateSidebar";
 import QuickProgressModal from "@/components/QuickProgressModal";
 import RandomPicker from "@/components/RandomPicker";
-import { useQuery } from "@tanstack/react-query";
+import UserProfile from "@/components/UserProfile";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Sparkles, Trophy, Coins } from "lucide-react";
 import type { MediaStats, QuickUpdateItem } from "@/lib/types";
 import type { MediaItem, Achievement } from "@shared/schema";
 
@@ -85,37 +86,12 @@ export default function Dashboard() {
           
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 mt-8">
             <div className="xl:col-span-3 space-y-6">
-              <div className="bg-surface rounded-xl p-6 border border-gray-700">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold">Weekly Progress</h3>
-                  <select className="bg-surface-2 border border-gray-600 rounded-lg px-3 py-1 text-sm">
-                    <option>Last 7 days</option>
-                    <option>Last 30 days</option>
-                    <option>Last 3 months</option>
-                  </select>
-                </div>
-                
-                <div className="h-64 bg-surface-2 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <i className="fas fa-chart-line text-4xl text-gray-500 mb-4"></i>
-                    <p className="text-gray-400">Progress Chart</p>
-                    <p className="text-sm text-gray-500">Chart visualization coming soon</p>
-                  </div>
-                </div>
-              </div>
-
+              <CurrentlyWatched />
               <RecentMediaList items={recentItems} isLoading={recentLoading} />
             </div>
 
             <div className="space-y-6">
-              <CurrentlyActive 
-                items={inProgressItems} 
-                isLoading={progressLoading}
-                onQuickUpdate={() => setIsQuickUpdateOpen(true)}
-              />
-
-              <CatalogPreview onOpenCatalog={() => setIsCatalogOpen(true)} />
-
+              <RandomPicker />
               <AchievementWidget 
                 achievements={achievements} 
                 isLoading={achievementsLoading} 

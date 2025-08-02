@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { MediaItem } from "@shared/schema";
-// Import EditMediaModal when it's needed
+import EditMediaModal from "./EditMediaModal";
 
 interface MediaLibraryProps {
   onAddMedia: () => void;
@@ -191,6 +191,22 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
               <SelectItem value="Watched">Watched</SelectItem>
               <SelectItem value="Read">Read</SelectItem>
               <SelectItem value="Dropped">Dropped</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Sort Options */}
+          <Select defaultValue="recently-updated">
+            <SelectTrigger className="w-44 bg-surface-2 border-gray-600">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent className="bg-surface-2 border-gray-600">
+              <SelectItem value="recently-updated">Recently Updated</SelectItem>
+              <SelectItem value="recently-watched">Recently Watched</SelectItem>
+              <SelectItem value="recently-added">Recently Added</SelectItem>
+              <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+              <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+              <SelectItem value="rating-high">Highest Rated</SelectItem>
+              <SelectItem value="rating-low">Lowest Rated</SelectItem>
             </SelectContent>
           </Select>
 

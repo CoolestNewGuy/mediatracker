@@ -5,7 +5,7 @@ import HeaderBar from "@/components/HeaderBar";
 import AddMediaModal from "@/components/AddMediaModal";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Star, Target, Calendar, BookOpen, Play } from "lucide-react";
+import { Trophy, Star, Target, Calendar, BookOpen, Play, Coins } from "lucide-react";
 import type { MediaStats, Achievement } from "@/lib/types";
 
 export default function Achievements() {
@@ -94,7 +94,7 @@ export default function Achievements() {
         />
         
         <div className="flex-1 flex flex-col min-h-screen">
-          <HeaderBar />
+          <HeaderBar onAddMedia={() => setIsAddModalOpen(true)} />
           
           <main className="flex-1 p-6">
             <div className="flex items-center justify-center h-64">
@@ -232,6 +232,72 @@ export default function Achievements() {
               );
             })}
 
+            {/* Leaderboards Section */}
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                <Trophy className="w-6 h-6 text-yellow-500" />
+                Leaderboards
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Points Leaderboard */}
+                <div className="bg-surface-2 rounded-lg p-6 border border-gray-700">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Coins className="w-5 h-5 text-yellow-500" />
+                    Top Points Earners
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { rank: 1, name: "AnimeMaster", points: 15420, avatar: "🎯" },
+                      { rank: 2, name: "You", points: (stats?.total || 0) * 10, avatar: "👤", isUser: true },
+                      { rank: 3, name: "BookWorm88", points: 12100, avatar: "📚" },
+                      { rank: 4, name: "CinemaLover", points: 10500, avatar: "🎬" },
+                      { rank: 5, name: "MangaReader", points: 8920, avatar: "📖" }
+                    ].map((user) => (
+                      <div key={user.rank} className={`flex items-center gap-3 p-3 rounded-lg ${user.isUser ? 'bg-purple-900/20 border border-purple-700' : ''}`}>
+                        <div className={`font-bold text-lg ${user.rank <= 3 ? 'text-yellow-500' : 'text-gray-400'}`}>
+                          #{user.rank}
+                        </div>
+                        <div className="text-2xl">{user.avatar}</div>
+                        <div className="flex-1">
+                          <div className="font-medium">{user.name}</div>
+                          <div className="text-sm text-gray-400">{user.points.toLocaleString()} points</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Achievement Leaderboard */}
+                <div className="bg-surface-2 rounded-lg p-6 border border-gray-700">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Star className="w-5 h-5 text-purple-500" />
+                    Most Achievements
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { rank: 1, name: "AchievementHunter", achievements: 47, avatar: "🏆" },
+                      { rank: 2, name: "CompletionistPro", achievements: 42, avatar: "✅" },
+                      { rank: 3, name: "You", achievements: achievements.filter(a => a.unlockedAt).length, avatar: "👤", isUser: true },
+                      { rank: 4, name: "MediaExplorer", achievements: 35, avatar: "🔍" },
+                      { rank: 5, name: "SeriesBinger", achievements: 31, avatar: "📺" }
+                    ].map((user) => (
+                      <div key={user.rank} className={`flex items-center gap-3 p-3 rounded-lg ${user.isUser ? 'bg-purple-900/20 border border-purple-700' : ''}`}>
+                        <div className={`font-bold text-lg ${user.rank <= 3 ? 'text-purple-500' : 'text-gray-400'}`}>
+                          #{user.rank}
+                        </div>
+                        <div className="text-2xl">{user.avatar}</div>
+                        <div className="flex-1">
+                          <div className="font-medium">{user.name}</div>
+                          <div className="text-sm text-gray-400">{user.achievements} achievements</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Empty State */}
             {achievements.length === 0 && (
               <div className="text-center py-12">
@@ -242,7 +308,7 @@ export default function Achievements() {
                 </p>
                 <button
                   onClick={() => setIsAddModalOpen(true)}
-                  className="bg-[#7A1927] hover:bg-[#9d2332] text-white px-6 py-2 rounded-lg"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg"
                 >
                   Add Your First Media
                 </button>
