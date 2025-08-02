@@ -1,0 +1,214 @@
+MEDIA TRACKER PROJECT - QUICK START INSTRUCTIONS
+
+===============================================
+PROJECT: Personal Media Tracking Platform
+GOAL: Track anime, manga, books, movies → Eventually analyze behavior & recommend
+DOMAIN: CoolestNewGuy.xyz
+===============================================
+
+WEEK 1: BASIC SETUP
+-------------------
+Day 1: Install Tools
+- Install WSL2 on Windows
+- Install Docker Desktop
+- Install VS Code
+- Install Node.js in WSL2
+
+Day 2: Create Project
+- Open WSL2 terminal
+- Run: npx create-next-app@latest media-tracker
+- Choose: TypeScript? Yes, Tailwind? Yes, App Router? Yes
+- Open project in VS Code
+
+Day 3: Database Setup
+- Start Docker Desktop
+- Run PostgreSQL container
+- Create database called "mediatracker"
+- Install Prisma for database management
+
+Day 4: First Data Model
+- Create schema for media items
+- Fields: id, title, type, status, progress, genre, dateAdded
+- Run first migration
+- Test with sample data
+
+Day 5-7: Basic Pages
+- Homepage with media type selection
+- Add new item form
+- List view for each media type
+- Simple edit/delete functions
+
+===============================================
+
+WEEK 2: MAKE IT WORK
+--------------------
+- Connect forms to database
+- Add status dropdown (To Watch, In Progress, Watched, Dropped)
+- Create auto-archive for dropped items
+- Import your Google Sheets data
+- Add search functionality
+
+===============================================
+
+WEEK 3: MAKE IT PRETTY
+----------------------
+- Dark theme (#0a0a0a background)
+- Red accents (#7A1927)
+- Rounded corners on all cards
+- Smooth animations on hover
+- Mobile responsive design
+- Progress bars for chapters/episodes
+
+===============================================
+
+WEEK 4: EXTERNAL DATA
+---------------------
+- Connect to AniList API for anime
+- Get movie posters from TMDB
+- Fetch book covers from Google Books
+- Auto-complete for titles
+- Show ratings and descriptions
+
+===============================================
+
+MONTH 2: SMART FEATURES
+-----------------------
+Week 5-6: Analytics
+- Track reading/watching speed
+- Show completion rates by genre
+- Time spent per media type
+- Monthly/weekly consumption graphs
+
+Week 7-8: Recommendations
+- Similar media suggestions
+- "Because you liked X" feature
+- Trending in your genres
+- Seasonal anime alerts
+
+===============================================
+
+MONTH 3: AI INTEGRATION
+-----------------------
+- Connect OpenAI API
+- Generate personalized descriptions
+- Analyze your consumption patterns
+- Predict what you'll like
+- Mood-based recommendations
+
+===============================================
+
+ESSENTIAL COMMANDS
+------------------
+Start project: npm run dev
+View site: http://localhost:3000
+Stop server: Ctrl+C
+Deploy: vercel --prod
+
+Database:
+- View data: npx prisma studio
+- Update schema: npx prisma migrate dev
+- Reset database: npx prisma migrate reset
+
+Git:
+- Save work: git add . && git commit -m "description"
+- Upload: git push origin main
+
+===============================================
+
+FILE STRUCTURE
+--------------
+media-tracker/
+├── app/                  (Pages and layouts)
+│   ├── page.tsx         (Homepage)
+│   ├── anime/           (Anime section)
+│   ├── manga/           (Manga section)
+│   └── movies/          (Movies section)
+├── components/          (Reusable parts)
+│   ├── MediaCard.tsx   (Display items)
+│   ├── AddForm.tsx     (Add new media)
+│   └── StatusBadge.tsx (Status colors)
+├── lib/                 (Database/utilities)
+│   ├── db.ts           (Database connection)
+│   └── types.ts        (TypeScript types)
+└── prisma/
+    └── schema.prisma    (Database structure)
+
+===============================================
+
+TROUBLESHOOTING
+---------------
+"Cannot connect to database"
+→ Make sure Docker is running
+→ Check PostgreSQL container is started
+
+"Module not found"
+→ Run: npm install
+→ Restart dev server
+
+"Page not updating"
+→ Hard refresh: Ctrl+Shift+R
+→ Clear Next.js cache: rm -rf .next
+
+"Git push rejected"
+→ Pull first: git pull origin main
+→ Then push again
+
+===============================================
+
+DAILY ROUTINE
+-------------
+1. Open Docker Desktop
+2. Open VS Code
+3. Open WSL2 terminal in VS Code
+4. Run: npm run dev
+5. Open browser to localhost:3000
+6. Code for 2-4 hours
+7. Commit changes to Git
+8. Push to GitHub
+
+===============================================
+
+LEARNING PATH
+-------------
+Week 1: HTML/CSS basics while building
+Week 2: JavaScript/TypeScript fundamentals  
+Week 3: React components and state
+Week 4: Database queries and API calls
+Month 2: Advanced React patterns
+Month 3: API integrations
+Month 4+: AI and machine learning
+
+===============================================
+
+HELP RESOURCES
+--------------
+Stuck? Search in order:
+1. Next.js docs (nextjs.org/docs)
+2. Stack Overflow
+3. YouTube tutorials
+4. Ask Claude/ChatGPT with project template
+5. Reddit r/nextjs or r/webdev
+
+===============================================
+
+MOTIVATION REMINDERS
+--------------------
+- Every big app started with "Hello World"
+- Google Sheets → Web App is already huge progress
+- Each feature you add is a skill learned
+- Your future self will thank current you
+- Building > Planning (just start coding)
+
+===============================================
+
+NEXT IMMEDIATE STEPS
+--------------------
+1. Save these instructions
+2. Install WSL2 right now (10 minutes)
+3. Create the project folder
+4. See "Hello World" on screen
+5. Celebrate small win
+6. Add one feature tomorrow
+
+Remember: You're not just building a media tracker.
+You're learning to build ANYTHING you can imagine.

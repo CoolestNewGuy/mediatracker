@@ -1,0 +1,415 @@
+// ======= MEDIA TRACKER GOOGLE SHEETS v3 (2024 Optimized) =======
+
+// ========== MENU SETUP ==========
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('📺 Media Tracker')
+    .addItem('➕ Add New Media', 'showAddMediaDialog')
+    .addItem('⚡ Quick Update', 'showQuickUpdateSidebar')
+    .addSeparator()
+    .addItem('🗄️ Batch Archive Dropped', 'archiveOldDroppedItems')
+    .addItem('📈 Time Tracker', 'showTimeTracker')
+    .addSeparator()
+    .addItem('📤 Export All Data', 'exportAllData')
+    .addItem('📥 Import Instructions', 'importFromCSV')
+    .addSeparator()
+    .addItem('🛠️ Setup Sheets', 'setupMediaSheets')
+    .addToUi();
+}
+
+// ========== SHEET SETUP ==========
+function setupMediaSheets() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var sheetConfigs = [
+    {
+      name: 'Anime',
+      headers: ['Name/Title','Status','Progress','Season','Episode','Genre','Date Added','Notes'],
+      status: ['To Watch', 'In Progress', 'Watched', 'Dropped']
+    },
+    {
+      name: 'Manhwa',
+      headers: ['Name/Title','Status','Progress','Chapters','Genre','Date Added','Notes'],
+      status: ['To Read','In Progress','Read','Dropped']
+    },
+    {
+      name: 'Pornhwa',
+      headers: ['Name/Title','Status','Progress','Chapters','Genre','Date Added','Notes'],
+      status: ['To Read','In Progress','Read','Dropped']
+    },
+    {
+      name: 'Novels',
+      headers: ['Name/Title','Status','Progress','Chapters','Genre','Date Added','Notes'],
+      status: ['To Read','In Progress','Read','Dropped']
+    },
+    {
+      name: 'Movies',
+      headers: ['Name/Title','Status','Genre','Date Added','Notes'],
+      status: ['To Watch','Watched','Dropped']
+    },
+    {
+      name: 'TV Shows',
+      headers: ['Name/Title','Status','Progress','Season','Episode','Genre','Date Added','Notes'],
+      status: ['To Watch', 'In Progress', 'Watched', 'Dropped']
+    },
+    {
+      name: 'Archive',
+      headers: ['Media Type','Name/Title','Status','Progress','Season/Chapters','Episode','Genre','Date Added','Notes','Archived Date'],
+      status: []
+    }
+  ];
+
+  var genreList = [
+    'Fantasy','Sci-Fi','Romance','Slice of Life','Action','Adventure',
+    'Comedy','Drama','Horror','Mystery','Thriller','Psychological',
+    'Sports','Supernatural','Historical'
+  ];
+
+  for (var i = 0; i < sheetConfigs.length; i++) {
+    var cfg = sheetConfigs[i];
+    var sheet = ss.getSheetByName(cfg.name) || ss.insertSheet(cfg.name);
+    sheet.clear();
+    sheet.appendRow(cfg.headers);
+
+    // Format
+    var header = sheet.getRange(1,1,1,cfg.headers.length);
+    header.setBackground('#7A1927').setFontColor('white').setFontWeight('bold');
+
+    // Status dropdown
+    var colStatus = cfg.headers.indexOf('Status')+1;
+    if (colStatus && cfg.status.length) {
+      var range = sheet.getRange(2, colStatus, 1000, 1);
+      var rule = SpreadsheetApp.newDataValidation()
+        .requireValueInList(cfg.status)
+        .setAllowInvalid(false)
+        .build();
+      range.setDataValidation(rule);
+    }
+
+    // Genre dropdown
+    var colGenre = cfg.headers.indexOf('Genre')+1;
+    if (colGenre) {
+      var range = sheet.getRange(2, colGenre, 1000, 1);
+      var rule = SpreadsheetApp.newDataValidation()
+        .requireValueInList(genreList)
+        .setAllowInvalid(true)
+        .build();
+      range.setDataValidation(rule);
+    }
+
+    sheet.setFrozenRows(1);
+    sheet.autoResizeColumns(1, cfg.headers.length);
+  }
+
+  SpreadsheetApp.getUi().alert("✅ All sheets ready! Start tracking your media.");
+}
+
+// ========== ADD MEDIA ==========
+function showAddMediaDialog() {
+  var html = HtmlService.createHtmlOutput(getAddMediaHTML())
+    .setWidth(430).setHeight(600);
+  SpreadsheetApp.getUi().showModalDialog(html, "Add New Media");
+}
+
+function getAddMediaHTML() {
+  // Short, text-only form for sheet compatibility
+  return (
+    "<div style='font-family:Arial;background:#18181b;color:#fff;padding:24px;border-radius:12px;'>" +
+    "<h2 style='color:#e44851;'>➕ Add New Media</h2>" +
+    "<form id='mediaForm'>" +
+    "Type*:<br><select name='type' id='type' required>" +
+    "<option value=''>Select...</option>" +
+    "<option>Anime</option><option>Manhwa</option><option>Pornhwa</option>" +
+    "<option>Novels</option><option>Movies</option><option>TV Shows</option></select><br><br>" +
+    "Title*:<br><input name='title' required maxlength='120'><br><br>" +
+    "Status*:<br><input name='status' required maxlength='50'><br><br>" +
+    "Progress (ep/ch):<br><input name='progress'><br><br>" +
+    "Season (#):<br><input name='season'><br><br>" +
+    "Episode/Chapter (#):<br><input name='epch'><br><br>" +
+    "Genre:<br><input name='genre'><br><br>" +
+    "Notes:<br><input name='notes'><br><br>" +
+    "<button type='button' onclick='submitMedia()' style='background:#7A1927;color:#fff;font-size:16px;padding:10px 30px;border:none;border-radius:8px;'>Add</button>" +
+    "</form>" +
+    "<script>" +
+      "function submitMedia() {" +
+      "  var f = document.getElementById('mediaForm');" +
+      "  google.script.run.withSuccessHandler(function(){f.reset();alert('Added!');}).addMedia({" +
+      "    type:f.type.value," +
+      "    title:f.title.value," +
+      "    status:f.status.value," +
+      "    progress:f.progress.value," +
+      "    season:f.season.value," +
+      "    epch:f.epch.value," +
+      "    genre:f.genre.value," +
+      "    notes:f.notes.value" +
+      "  });" +
+      "}" +
+    "</script></div>"
+  );
+}
+
+function addMedia(data) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(data.type);
+  if (!sheet) throw new Error("No such sheet: " + data.type);
+  var dateStr = new Date().toLocaleDateString();
+
+  // Row structuring
+  var row = [];
+  if (data.type == 'Anime' || data.type == 'TV Shows') {
+    row = [
+      data.title,
+      data.status,
+      data.progress || '', // "S1E12" etc
+      data.season || '',
+      data.epch || '',
+      data.genre || '',
+      dateStr,
+      data.notes || ''
+    ];
+  } else if (data.type == 'Manhwa' || data.type == 'Pornhwa' || data.type == 'Novels') {
+    row = [
+      data.title,
+      data.status,
+      data.progress || '',
+      data.epch || '',
+      data.genre || '',
+      dateStr,
+      data.notes || ''
+    ];
+  } else if (data.type == 'Movies') {
+    row = [
+      data.title,
+      data.status,
+      data.genre || '',
+      dateStr,
+      data.notes || ''
+    ];
+  }
+
+  sheet.appendRow(row);
+
+  // Immediate auto-archive if Dropped
+  var nrow = sheet.getLastRow();
+  if (data.status == 'Dropped') moveToArchive(sheet, nrow);
+}
+
+// ========== QUICK UPDATE ==========
+function showQuickUpdateSidebar() {
+  var html = HtmlService.createHtmlOutput(
+    "<div style='font-family:Arial;background:#18181b;color:#fff;padding:15px'><h3>⚡ Quick Update</h3>" +
+    "<p><b>Not yet implemented in this version.</b><br>Update progress, mark complete, or drop items quickly.</p></div>"
+  ).setWidth(340);
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+// ========== ARCHIVING DROPPED ==========
+function archiveOldDroppedItems() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetNames = ['Anime','Manhwa','Pornhwa','Novels','Movies','TV Shows'];
+  var n = 0;
+  var ARCHIVE_DAYS = 90; // Days threshold
+
+  for (var s = 0; s < sheetNames.length; s++) {
+    var sheet = ss.getSheetByName(sheetNames[s]);
+    var data = sheet.getDataRange().getValues();
+    var header = data[0];
+    var statusCol = header.indexOf('Status');
+    var dateCol = header.indexOf('Date Added');
+    var toArchive = [];
+
+    for (var i = 1; i < data.length; i++) {
+      var status = data[i][statusCol];
+      if (status == 'Dropped') {
+        var date = data[i][dateCol];
+        var addedDate = typeof date == 'string' ? new Date(date) : date;
+        if (!isNaN(addedDate.getTime())) {
+          var daysAgo = (new Date() - addedDate) / (1000*3600*24);
+          if (daysAgo > ARCHIVE_DAYS) toArchive.push(i+1);
+        }
+      }
+    }
+    // Archive rows from last to first (to keep row numbers valid)
+    for (var j = toArchive.length-1; j >=0; j--) {
+      moveToArchive(sheet, toArchive[j]); n++;
+    }
+  }
+
+  SpreadsheetApp.getUi().alert("Archived "+n+" old dropped items!");
+}
+
+function moveToArchive(sheet, row) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var archive = ss.getSheetByName("Archive");
+  var t = sheet.getName();
+  var rowData = sheet.getRange(row, 1, 1, sheet.getLastColumn()).getValues()[0];
+  // Align fields for archive
+  var archiveRow = [t];
+
+  // Map based on type
+  if (t == "Anime" || t == "TV Shows") { // 8 cols
+    archiveRow = archiveRow.concat(
+      rowData[0], rowData[1], rowData[2], rowData[3], rowData[4],
+      rowData[5], rowData[6], rowData[7] || "", "", new Date().toLocaleDateString());
+    // (Type),Title,Status,Progress,Season,Episode,Genre,DateAdded,Notes, '', Archived Date
+  } else if (t == "Manhwa" || t == "Pornhwa" || t == "Novels") { // 7 cols
+    archiveRow = archiveRow.concat(
+      rowData[0], rowData[1], rowData[2], rowData[3], "",
+      rowData[4], rowData[5], rowData[6] || "", "", new Date().toLocaleDateString());
+    // (Type),Title,Status,Progress,Chapters,'',Genre,DateAdded,Notes,'',Archived Date
+  } else if (t == "Movies") { // 5 cols
+    archiveRow = archiveRow.concat(
+      rowData[0], rowData[1], "", "", "",
+      rowData[2], rowData[3], rowData[4] || "", "", new Date().toLocaleDateString());
+    // (Type),Title,Status,'','','',Genre,DateAdded,Notes,'',Archived Date
+  }
+  archive.appendRow(archiveRow);
+  sheet.deleteRow(row);
+}
+
+// ========== EXPORT / IMPORT ==========
+function exportAllData() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ['Anime','Manhwa','Pornhwa','Novels','Movies','TV Shows','Archive'];
+  var exp = {};
+  for (var i = 0; i < sheets.length; i++) {
+    var sh = ss.getSheetByName(sheets[i]);
+    if (sh) exp[sheets[i]] = sh.getDataRange().getValues();
+  }
+  var blob = Utilities.newBlob(
+    JSON.stringify(exp, null, 1),
+    "application/json",
+    "MediaTracker-Export-"+new Date().toISOString().replace(/[:.]/g,'-')+".json"
+  );
+  var f = DriveApp.createFile(blob);
+  SpreadsheetApp.getUi().alert("📤 Exported to Drive:\n"+f.getUrl());
+}
+
+function importFromCSV() {
+  var html = HtmlService.createHtmlOutput(
+    "<div style='font-family:Arial;padding:16px;background:#18181b;color:#fff'>" +
+    "<h3>CSV Import Instructions</h3>" +
+    "<ol><li>Upload your CSV to Google Drive</li>" +
+    "<li>Open with Google Sheets</li>" +
+    "<li><b>Reformat columns to match: Title, Status, Progress, etc.&nbsp;as in the sample sheets.</b></li>" +
+    "<li>Copy/paste to the correct sheet in this workbook.</li></ol></div>"
+  ).setWidth(340);
+  SpreadsheetApp.getUi().showModalDialog(html, "Import Help");
+}
+
+// ========== TIME TRACKER ==========
+function showTimeTracker() {
+  var t = timeStats();
+  var html = HtmlService.createHtmlOutput(
+    "<div style='font-family:Arial;background:#18181b;color:#fff;padding:18px'>" +
+    "<h2 style='color:#e44851;'>⏰ Time Tracker</h2>" +
+    "<table style='width:100%;margin-bottom:8px'>" +
+    "<tr><th align='left'>Type</th><th align='center'>Completed</th><th align='right'>Est. Minutes</th></tr>" +
+    "<tr><td>Anime</td><td align='center'>" + t.anime.c + "</td><td align='right'>" + t.anime.min + "</td></tr>" +
+    "<tr><td>Manhwa</td><td align='center'>" + t.manhwa.c + "</td><td align='right'>" + t.manhwa.min + "</td></tr>" +
+    "<tr><td>Novels</td><td align='center'>" + t.novels.c + "</td><td align='right'>" + t.novels.min + "</td></tr>" +
+    "<tr><td>Pornhwa</td><td align='center'>" + t.pornhwa.c + "</td><td align='right'>" + t.pornhwa.min + "</td></tr>" +
+    "<tr><td>TV Shows</td><td align='center'>" + t.tvshows.c + "</td><td align='right'>" + t.tvshows.min + "</td></tr>" +
+    "<tr><td>Movies</td><td align='center'>" + t.movies.c + "</td><td align='right'>" + t.movies.min + "</td></tr>" +
+    "</table><hr style='opacity:.2'>" +
+    "<div style='margin:10px 0'><b>Total Estimated: "+t.h+"h "+t.m+"m</b></div>" +
+    "<small>Estimates: 24min/ep, 3min/ch, 120min/movie, 45min/TV ep</small></div>"
+  ).setWidth(370).setHeight(360);
+  SpreadsheetApp.getUi().showModalDialog(html, "Time Tracker");
+}
+
+function timeStats() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet(), total = 0;
+  // Defaults: anime/tv=episodes*24min, manhwa/pornhwa/novel=ch*3min, movie=120min
+  var result = {
+    anime: {c:0,min:0}, manhwa:{c:0,min:0}, novels:{c:0,min:0}, pornhwa:{c:0,min:0},
+    tvshows:{c:0,min:0}, movies: {c:0,min:0}
+  };
+  // Anime
+  var sheet = ss.getSheetByName("Anime");
+  if (sheet) {
+    var dat = sheet.getDataRange().getValues();
+    var st = dat[0].indexOf("Status");
+    var ep = dat[0].indexOf("Episode");
+    for (var i=1;i<dat.length;i++) {
+      if ((dat[i][st]+"").match(/Watched/i)) {
+        var n = parseInt(dat[i][ep],10)||0;
+        result.anime.c++; result.anime.min+= n? n*24 : 12*24;
+      }
+    }
+  }
+  // Manhwa
+  sheet = ss.getSheetByName("Manhwa");
+  if (sheet) {
+    var dat = sheet.getDataRange().getValues();
+    var st = dat[0].indexOf("Status");
+    var ch = dat[0].indexOf("Chapters");
+    for (var i=1;i<dat.length;i++) if ((dat[i][st]+"").match(/Read/i)) {
+      var n = parseInt(dat[i][ch],10)||0;
+      result.manhwa.c++; result.manhwa.min+= n? n*3 : 50*3;
+    }
+  }
+  // Pornhwa
+  sheet = ss.getSheetByName("Pornhwa");
+  if (sheet) {
+    var dat = sheet.getDataRange().getValues();
+    var st = dat[0].indexOf("Status");
+    var ch = dat[0].indexOf("Chapters");
+    for (var i=1;i<dat.length;i++) if ((dat[i][st]+"").match(/Read/i)) {
+      var n = parseInt(dat[i][ch],10)||0;
+      result.pornhwa.c++; result.pornhwa.min+= n? n*3 : 50*3;
+    }
+  }
+  // Novels
+  sheet = ss.getSheetByName("Novels");
+  if (sheet) {
+    var dat = sheet.getDataRange().getValues();
+    var st = dat[0].indexOf("Status");
+    var ch = dat[0].indexOf("Chapters");
+    for (var i=1;i<dat.length;i++) if ((dat[i][st]+"").match(/Read/i)) {
+      var n = parseInt(dat[i][ch],10)||0;
+      result.novels.c++; result.novels.min+= n? n*3 : 120*3;
+    }
+  }
+  // TV Shows
+  sheet = ss.getSheetByName("TV Shows");
+  if (sheet) {
+    var dat = sheet.getDataRange().getValues();
+    var st = dat[0].indexOf("Status");
+    var ep = dat[0].indexOf("Episode");
+    for (var i=1;i<dat.length;i++) if ((dat[i][st]+"").match(/Watched/i)) {
+      var n = parseInt(dat[i][ep],10)||0;
+      result.tvshows.c++; result.tvshows.min+= n? n*45 : 12*45;
+    }
+  }
+  // Movies
+  sheet = ss.getSheetByName("Movies");
+  if (sheet) {
+    var dat = sheet.getDataRange().getValues();
+    var st = dat[0].indexOf("Status");
+    for (var i=1;i<dat.length;i++) if ((dat[i][st]+"").match(/Watched/i)) {
+      result.movies.c++; result.movies.min+= 120;
+    }
+  }
+  // Sum
+  var tmin = result.anime.min + result.manhwa.min + result.pornhwa.min + result.novels.min + result.tvshows.min + result.movies.min;
+  return {
+    anime: result.anime, manhwa: result.manhwa, novels: result.novels, pornhwa: result.pornhwa, tvshows: result.tvshows, movies: result.movies,
+    h: Math.floor(tmin/60), m: tmin%60
+  };
+}
+
+// ========== OPTIONAL: ONEDIT AUTO ==========
+function onEdit(e) {
+  if (!e) return;
+  var sh = e.range.getSheet();
+  if (sh.getName() == "Archive") return;
+  var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  if (e.range.getRow()==1) return; // skip header
+  // Auto-archive on status drop
+  var statusCol = headers.indexOf('Status')+1;
+  if (statusCol && e.range.getColumn() === statusCol && e.value == 'Dropped') {
+    moveToArchive(sh, e.range.getRow());
+  }
+}
+

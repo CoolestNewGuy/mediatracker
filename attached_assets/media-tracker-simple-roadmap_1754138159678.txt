@@ -1,0 +1,101 @@
+MEDIA TRACKER - SIMPLE ROADMAP
+==============================
+
+WHERE YOU ARE NOW:
+- Have: Google Sheets with media data
+- Want: Beautiful website that tracks everything
+- Future: AI that knows what you'll love
+
+WHAT YOU'RE BUILDING:
+Website where you can:
+1. Add anime/manga/movies you want to watch
+2. Track your progress (Episode 5, Chapter 25)
+3. See pretty charts of what you've watched
+4. Get AI recommendations based on your taste
+
+THE PATH:
+Month 1: Basic Website
+- Replace Google Sheets with a real website
+- Add/edit/delete your media
+- See lists organized by type
+- Dark theme with smooth animations
+
+Month 2: Make It Smart
+- Auto-fetch cover images
+- Show ratings from internet
+- Track your watching patterns
+- Simple recommendations
+
+Month 3: Add AI Brain
+- AI learns what you like
+- Suggests new things to watch
+- Analyzes your mood patterns
+- Predicts what you'll enjoy
+
+Month 6: Life Tracker
+- Track games, books, activities
+- See patterns in your behavior  
+- Get life optimization tips
+- Full personal AI assistant
+
+TOOLS YOU NEED (FREE):
+1. WSL2 - Linux on Windows
+2. VS Code - Where you write code
+3. Docker - Runs your database
+4. Node.js - Makes websites work
+5. Git - Saves your progress
+
+SKILLS YOU'LL LEARN:
+- Making websites (HTML/CSS)
+- Programming (JavaScript)
+- Databases (PostgreSQL)
+- AI Integration (OpenAI)
+- Modern web development
+
+WEEK BY WEEK:
+Week 1: See "Hello World" on your domain
+Week 2: Add your first anime to database
+Week 3: Make it look beautiful
+Week 4: Import all your Google Sheets data
+Week 5: Add search and filters
+Week 6: Connect to anime/movie APIs
+Week 7: Show your watching statistics
+Week 8: Deploy to CoolestNewGuy.xyz
+
+REMEMBER:
+- Start ugly, make pretty later
+- Working > Perfect
+- Every error teaches you something
+- You're building job-ready skills
+- This stack can build ANY web app
+
+FIRST STEP TODAY:
+1. Install WSL2 (Windows Store)
+2. Type: npx create-next-app media-tracker
+3. See your first website appear
+4. You're now a web developer!
+
+TIME NEEDED:
+- 1-2 hours per day learning
+- 4-6 hours weekend building
+- 3 months to working platform
+- 6 months to AI features
+- 1 year to master the stack
+
+END RESULT:
+Your personal AI assistant that:
+- Knows all your preferences
+- Suggests perfect entertainment
+- Tracks your habits
+- Helps optimize your life
+- Runs on YOUR domain
+- YOU built it all yourself
+
+This is the same tech stack used by:
+- Netflix (Next.js)
+- Instagram (React)
+- Notion (PostgreSQL)
+- ChatGPT (OpenAI)
+
+You're learning the real tools.
+Let's build something amazing!
