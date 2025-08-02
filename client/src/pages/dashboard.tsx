@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import Sidebar from "@/components/Sidebar";
 import HeaderBar from "@/components/HeaderBar";
 import StatsCards from "@/components/StatsCards";
@@ -19,66 +17,28 @@ import type { MediaStats, QuickUpdateItem } from "@/lib/types";
 import type { MediaItem, Achievement } from "@shared/schema";
 
 export default function Dashboard() {
-  const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isQuickUpdateOpen, setIsQuickUpdateOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery<MediaStats>({
+  const { data: stats, isLoading: statsLoading } = useQuery<MediaStats>({
     queryKey: ['/api/stats'],
-    enabled: isAuthenticated,
   });
 
-  const { data: recentItems, isLoading: recentLoading, error: recentError } = useQuery<MediaItem[]>({
+  const { data: recentItems, isLoading: recentLoading } = useQuery<MediaItem[]>({
     queryKey: ['/api/recent'],
-    enabled: isAuthenticated,
   });
 
-  const { data: inProgressItems, isLoading: progressLoading, error: progressError } = useQuery<MediaItem[]>({
+  const { data: inProgressItems, isLoading: progressLoading } = useQuery<MediaItem[]>({
     queryKey: ['/api/media/in-progress'],
-    enabled: isAuthenticated,
   });
 
-  const { data: achievements, isLoading: achievementsLoading, error: achievementsError } = useQuery<Achievement[]>({
+  const { data: achievements, isLoading: achievementsLoading } = useQuery<Achievement[]>({
     queryKey: ['/api/achievements'],
-    enabled: isAuthenticated,
   });
 
-  // Handle authentication errors
-  useEffect(() => {
-    const errors = [statsError, recentError, progressError, achievementsError].filter(Boolean);
-    for (const error of errors) {
-      if (error && isUnauthorizedError(error as Error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-    }
-  }, [statsError, recentError, progressError, achievementsError, toast]);
-
-  if (isLoading || statsLoading) {
+  if (statsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -87,10 +47,6 @@ export default function Dashboard() {
         </div>
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
   }
 
   return (

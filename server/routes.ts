@@ -2,19 +2,17 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertMediaItemSchema } from "@shared/schema";
-import { setupAuth, isAuthenticated } from "./replitAuth";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Use a default user ID since we removed authentication
+  const DEFAULT_USER_ID = "default-user";
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Auth routes (simplified without authentication)
+  app.get('/api/auth/user', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      const user = await storage.getUser(DEFAULT_USER_ID);
+      res.json(user || { id: DEFAULT_USER_ID, email: "user@example.com" });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -22,26 +20,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Media routes
-  app.get("/api/media", isAuthenticated, async (req: any, res) => {
+  app.get("/api/media", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { type, status } = req.query;
       const filters = {
         type: typeof type === 'string' ? type : undefined,
         status: typeof status === 'string' ? status : undefined
       };
       
-      const mediaItems = await storage.getMediaItems(userId, filters);
+      const mediaItems = await storage.getMediaItems(DEFAULT_USER_ID, filters);
       res.json(mediaItems);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch media items" });
     }
   });
 
-  app.get("/api/media/:id", isAuthenticated, async (req: any, res) => {
+  app.get("/api/media/:id", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const mediaItem = await storage.getMediaItem(req.params.id, userId);
+      const mediaItem = await storage.getMediaItem(req.params.id, DEFAULT_USER_ID);
       if (!mediaItem) {
         return res.status(404).json({ error: "Media item not found" });
       }
@@ -51,13 +47,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/media", isAuthenticated, async (req: any, res) => {
+  app.post("/api/media", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const validatedData = insertMediaItemSchema.parse(req.body);
       const mediaItem = await storage.createMediaItem({
         ...validatedData,
-        userId: userId
+        userId: DEFAULT_USER_ID
       });
       res.status(201).json(mediaItem);
     } catch (error) {
@@ -68,11 +63,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/media/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/media/:id", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const updates = insertMediaItemSchema.partial().parse(req.body);
-      const mediaItem = await storage.updateMediaItem(req.params.id, userId, updates);
+      const mediaItem = await storage.updateMediaItem(req.params.id, DEFAULT_USER_ID, updates);
       if (!mediaItem) {
         return res.status(404).json({ error: "Media item not found" });
       }
@@ -85,10 +79,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/media/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/media/:id", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const success = await storage.deleteMediaItem(req.params.id, userId);
+      const success = await storage.deleteMediaItem(req.params.id, DEFAULT_USER_ID);
       if (!success) {
         return res.status(404).json({ error: "Media item not found" });
       }
@@ -99,20 +92,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Progress routes
-  app.get("/api/media/in-progress", isAuthenticated, async (req: any, res) => {
+  app.get("/api/media/in-progress", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const items = await storage.getInProgressItems(userId);
+      const items = await storage.getInProgressItems(DEFAULT_USER_ID);
       res.json(items);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch in-progress items" });
     }
   });
 
-  app.post("/api/media/:id/increment", isAuthenticated, async (req: any, res) => {
+  app.post("/api/media/:id/increment", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const mediaItem = await storage.getMediaItem(req.params.id, userId);
+      const mediaItem = await storage.getMediaItem(req.params.id, DEFAULT_USER_ID);
       if (!mediaItem) {
         return res.status(404).json({ error: "Media item not found" });
       }
@@ -139,17 +130,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       }
 
-      const updatedItem = await storage.updateMediaItem(req.params.id, userId, updates);
+      const updatedItem = await storage.updateMediaItem(req.params.id, DEFAULT_USER_ID, updates);
       res.json(updatedItem);
     } catch (error) {
       res.status(500).json({ error: "Failed to increment progress" });
     }
   });
 
-  app.post("/api/media/:id/complete", isAuthenticated, async (req: any, res) => {
+  app.post("/api/media/:id/complete", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const mediaItem = await storage.getMediaItem(req.params.id, userId);
+      const mediaItem = await storage.getMediaItem(req.params.id, DEFAULT_USER_ID);
       if (!mediaItem) {
         return res.status(404).json({ error: "Media item not found" });
       }
@@ -158,7 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? 'Watched' 
         : 'Read';
 
-      const updatedItem = await storage.updateMediaItem(req.params.id, userId, {
+      const updatedItem = await storage.updateMediaItem(req.params.id, DEFAULT_USER_ID, {
         status: completedStatus,
         dateCompleted: new Date()
       });
@@ -170,20 +160,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stats routes
-  app.get("/api/stats", isAuthenticated, async (req: any, res) => {
+  app.get("/api/stats", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const stats = await storage.getDetailedStats(userId);
+      const stats = await storage.getDetailedStats(DEFAULT_USER_ID);
       res.json(stats);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch stats" });
     }
   });
 
-  app.get("/api/stats/user", isAuthenticated, async (req: any, res) => {
+  app.get("/api/stats/user", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const userStats = await storage.getUserStats(userId);
+      const userStats = await storage.getUserStats(DEFAULT_USER_ID);
       res.json(userStats);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch user stats" });
@@ -191,31 +179,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Search and random routes
-  app.get("/api/search", isAuthenticated, async (req: any, res) => {
+  app.get("/api/search", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { q } = req.query;
       if (typeof q !== 'string' || q.trim().length === 0) {
         return res.status(400).json({ error: "Query parameter is required" });
       }
       
-      const results = await storage.searchMediaItems(userId, q.trim());
+      const results = await storage.searchMediaItems(DEFAULT_USER_ID, q.trim());
       res.json(results);
     } catch (error) {
       res.status(500).json({ error: "Failed to search media items" });
     }
   });
 
-  app.get("/api/random", isAuthenticated, async (req: any, res) => {
+  app.get("/api/random", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { type, status } = req.query;
       const filters = {
         type: typeof type === 'string' ? type : undefined,
         status: typeof status === 'string' ? status : undefined
       };
       
-      const randomItem = await storage.getRandomItem(userId, filters);
+      const randomItem = await storage.getRandomItem(DEFAULT_USER_ID, filters);
       if (!randomItem) {
         return res.status(404).json({ error: "No items found with the specified filters" });
       }
@@ -227,10 +213,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Achievement routes
-  app.get("/api/achievements", isAuthenticated, async (req: any, res) => {
+  app.get("/api/achievements", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const achievements = await storage.getUserAchievements(userId);
+      const achievements = await storage.getUserAchievements(DEFAULT_USER_ID);
       res.json(achievements);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch achievements" });
@@ -238,11 +223,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Recent items
-  app.get("/api/recent", isAuthenticated, async (req: any, res) => {
+  app.get("/api/recent", async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const recentItems = await storage.getRecentlyAdded(userId, limit);
+      const recentItems = await storage.getRecentlyAdded(DEFAULT_USER_ID, limit);
       res.json(recentItems);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch recent items" });
