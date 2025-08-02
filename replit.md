@@ -12,6 +12,7 @@ Preferred AI: Claude for non-invasive guidance
 Domain: CoolestNewGuy.xyz
 Interface preference: Catalog view over random picker for browsing content
 Streaming integration: Netflix, Prime Video, and other major providers (planned)
+Authentication: Replit Auth for secure user sessions (implemented 2025-01-02)
 
 ## System Architecture
 
@@ -31,15 +32,20 @@ Streaming integration: Netflix, Prime Video, and other major providers (planned)
 - **Development**: Hot reloading with Vite integration for seamless development experience
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL with tables for users, media items, achievements, and user statistics
-- **Schema Design**: Normalized schema with support for multiple media types and flexible progress tracking
+- **Primary Database**: PostgreSQL with tables for users, media items, achievements, user statistics, and sessions
+- **Schema Design**: Normalized schema with support for multiple media types, flexible progress tracking, and Replit Auth integration
+- **User Management**: Automatic user creation/update via OpenID Connect claims with profile data storage
+- **Session Storage**: PostgreSQL-backed session store with automatic cleanup and secure cookie management
 - **Connection**: Neon serverless PostgreSQL with WebSocket support for optimal performance
 - **Migrations**: Drizzle Kit for schema migrations and database versioning
 
 ### Authentication and Authorization
-- **Session Management**: Basic user session handling (currently using demo user for development)
-- **Future Implementation**: Designed to support proper authentication with user registration/login
+- **Session Management**: Replit Auth implementation with secure session handling using PostgreSQL session store
+- **Authentication Provider**: OpenID Connect via Replit for seamless user authentication
+- **Session Storage**: Database-backed sessions with 7-day TTL and automatic refresh token handling
 - **Authorization**: User-scoped data access with userId filtering on all media operations
+- **User Interface**: Landing page for unauthenticated users, dashboard for authenticated users
+- **Security**: All API routes protected with authentication middleware, proper error handling for unauthorized access
 
 ### External Dependencies
 - **UI Framework**: Radix UI primitives for accessible, unstyled components
