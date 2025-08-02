@@ -4,7 +4,7 @@ import {
   achievements, 
   userStats,
   type User, 
-  type InsertUser,
+  type UpsertUser,
   type MediaItem,
   type InsertMediaItem,
   type Achievement,
@@ -17,9 +17,9 @@ import { eq, desc, asc, and, count, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
+  // (IMPORTANT) these user operations are mandatory for Replit Auth.
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
 
   // Media methods
   getMediaItems(userId: string, filters?: { type?: string; status?: string }): Promise<MediaItem[]>;
@@ -50,19 +50,21 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(insertUser)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
       .returning();
     
-    // Create initial user stats
-    await db.insert(userStats).values({ userId: user.id });
+    // Create initial user stats if user is new
+    await db.insert(userStats).values({ userId: user.id }).onConflictDoNothing();
     
     return user;
   }

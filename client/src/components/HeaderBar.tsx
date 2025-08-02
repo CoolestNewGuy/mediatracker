@@ -1,13 +1,24 @@
-import { Search, Plus, User, Flame } from "lucide-react";
+import { Search, Plus, User, Flame, LogOut, ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface HeaderBarProps {
   onAddMedia: () => void;
 }
 
 export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
@@ -44,15 +55,46 @@ export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
           </Button>
           
           {/* User Menu */}
-          <div className="relative">
-            <Button 
-              variant="outline" 
-              size="icon"
-              className="w-8 h-8 bg-primary-red border-primary-red"
-            >
-              <User className="w-4 h-4" />
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="flex items-center space-x-2 bg-surface-2 border-gray-600 hover:bg-surface-3"
+              >
+                <Avatar className="w-6 h-6">
+                  <AvatarImage src={user?.profileImageUrl || ""} />
+                  <AvatarFallback className="bg-primary-red text-white text-xs">
+                    {user?.firstName?.charAt(0) || user?.email?.charAt(0) || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm">
+                  {user?.firstName || user?.email?.split('@')[0] || "User"}
+                </span>
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">
+                    {user?.firstName && user?.lastName 
+                      ? `${user.firstName} ${user.lastName}`
+                      : user?.email?.split('@')[0] || "User"
+                    }
+                  </p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => window.location.href = '/api/logout'}
+                className="text-red-600 focus:text-red-600"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
