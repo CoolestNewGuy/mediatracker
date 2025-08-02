@@ -1,4 +1,5 @@
 import { Film, TvIcon, Book, BookOpen, Heart, PlayCircle, Plus, Search, Library, Clock, Trophy, Settings, Download, ChartLine, Grid } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import type { MediaStats } from "@/lib/types";
 
 interface SidebarProps {
@@ -9,6 +10,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalog }: SidebarProps) {
+  const [location] = useLocation();
+  
   // Media types matching your specifications
   const mediaTypes = [
     { name: 'Anime', icon: TvIcon, count: stats?.byType?.Anime?.total || 0 },
@@ -37,10 +40,12 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
       {/* Navigation Menu */}
       <nav className="p-4">
         <div className="space-y-2">
-          <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-white bg-[#7A1927]">
+          <Link href="/" className={`sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+            location === '/' ? 'text-white bg-[#7A1927]' : 'text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-[#7A1927]'
+          }`}>
             <ChartLine size={16} />
             <span>Dashboard</span>
-          </a>
+          </Link>
           <button 
             onClick={onAddMedia}
             className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-[#7A1927] transition-all duration-200"
@@ -48,10 +53,12 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
             <Plus size={16} />
             <span>Add Media</span>
           </button>
-          <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-[#7A1927] transition-all duration-200">
-            <Search size={16} />
-            <span>Search All</span>
-          </a>
+          <Link href="/library" className={`sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+            location === '/library' ? 'text-white bg-[#7A1927]' : 'text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-[#7A1927]'
+          }`}>
+            <Library size={16} />
+            <span>Full Library</span>
+          </Link>
         </div>
 
         {/* Media Categories */}
@@ -61,9 +68,9 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
             {mediaTypes.map((type) => {
               const Icon = type.icon;
               return (
-                <a 
+                <Link 
                   key={type.name}
-                  href="#" 
+                  href={`/library?type=${encodeURIComponent(type.name)}`}
                   className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-[#7A1927] transition-all duration-200"
                 >
                   <Icon size={16} className="text-[#7A1927]" />
@@ -71,7 +78,7 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
                   <span className="ml-auto bg-surface-2 px-2 py-1 rounded text-xs">
                     {type.count}
                   </span>
-                </a>
+                </Link>
               );
             })}
           </div>
