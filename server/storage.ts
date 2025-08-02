@@ -31,6 +31,7 @@ export interface IStorage {
   getRecentlyAdded(userId: string, limit?: number): Promise<MediaItem[]>;
   searchMediaItems(userId: string, query: string): Promise<MediaItem[]>;
   getRandomItem(userId: string, filters?: { type?: string; status?: string }): Promise<MediaItem | undefined>;
+  getAllMediaItems(userId: string): Promise<MediaItem[]>;
 
   // Stats methods
   getUserStats(userId: string): Promise<UserStats | undefined>;
@@ -196,11 +197,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRandomItem(userId: string, filters?: { type?: string; status?: string }): Promise<MediaItem | undefined> {
+    console.log('getRandomItem called with filters:', filters);
     const items = await this.getMediaItems(userId, filters);
+    console.log('Found items for random selection:', items.length);
+    
     if (items.length === 0) return undefined;
     
     const randomIndex = Math.floor(Math.random() * items.length);
-    return items[randomIndex];
+    const selectedItem = items[randomIndex];
+    console.log('Selected random item:', selectedItem?.title);
+    
+    return selectedItem;
+  }
+
+  async getAllMediaItems(userId: string): Promise<MediaItem[]> {
+    return await db
+      .select()
+      .from(mediaItems)
+      .where(and(eq(mediaItems.userId, userId), eq(mediaItems.isArchived, false)))
+      .orderBy(desc(mediaItems.dateAdded));
   }
 
   // Stats methods

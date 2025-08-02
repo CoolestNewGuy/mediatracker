@@ -78,7 +78,7 @@ export default function SmartCollections({ onOpenCatalog }: SmartCollectionsProp
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Continue Watching */}
       {collections.continueWatching.length > 0 && (
         <Card className="bg-surface border-gray-700">
@@ -99,7 +99,7 @@ export default function SmartCollections({ onOpenCatalog }: SmartCollectionsProp
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
               {collections.continueWatching.map((item) => (
                 <div key={item.id} className="group cursor-pointer">
                   <div className="relative aspect-[2/3] mb-2 rounded-lg overflow-hidden">

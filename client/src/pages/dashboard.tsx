@@ -76,14 +76,15 @@ export default function Dashboard() {
       <div className="flex-1 flex flex-col">
         <HeaderBar onAddMedia={() => setIsAddModalOpen(true)} />
         
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="space-y-6">
-            <SmartCollections onOpenCatalog={() => setIsCatalogOpen(true)} />
-            <StatsCards stats={stats} />
-          </div>
+        <main className="flex-1 overflow-y-auto">
+          <div className="container-wide py-8">
+            <div className="space-y-6">
+              <SmartCollections onOpenCatalog={() => setIsCatalogOpen(true)} />
+              <StatsCards stats={stats} />
+            </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 mt-8">
+            <div className="xl:col-span-3 space-y-6">
               <div className="bg-surface rounded-xl p-6 border border-gray-700">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold">Weekly Progress</h3>
@@ -120,6 +121,7 @@ export default function Dashboard() {
                 isLoading={achievementsLoading} 
               />
             </div>
+          </div>
           </div>
         </main>
       </div>
