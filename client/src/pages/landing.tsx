@@ -26,9 +26,9 @@ export default function Landing() {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          <Card className="border-2 hover:border-red-500/50 transition-colors">
+          <Card className="border-2 hover:border-accent transition-colors">
             <CardHeader>
-              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
                 <Film className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Multiple Media Types</CardTitle>
@@ -38,9 +38,9 @@ export default function Landing() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-red-500/50 transition-colors">
+          <Card className="border-2 hover:border-accent transition-colors">
             <CardHeader>
-              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
                 <Target className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Progress Tracking</CardTitle>
@@ -50,9 +50,9 @@ export default function Landing() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-red-500/50 transition-colors">
+          <Card className="border-2 hover:border-accent transition-colors">
             <CardHeader>
-              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
                 <Star className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Ratings & Reviews</CardTitle>
@@ -62,9 +62,9 @@ export default function Landing() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-red-500/50 transition-colors">
+          <Card className="border-2 hover:border-accent transition-colors">
             <CardHeader>
-              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
                 <Users className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Achievement System</CardTitle>
@@ -77,7 +77,7 @@ export default function Landing() {
           <Card className="border-2 hover:border-accent transition-colors">
             <CardHeader>
               <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
-                <Play className="w-6 h-6 text-accent" />
+                <Play className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Smart Organization</CardTitle>
               <CardDescription>
@@ -89,7 +89,7 @@ export default function Landing() {
           <Card className="border-2 hover:border-accent transition-colors">
             <CardHeader>
               <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
-                <Book className="w-6 h-6 text-accent" />
+                <Book className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Future Integration</CardTitle>
               <CardDescription>
@@ -104,19 +104,19 @@ export default function Landing() {
           <h2 className="text-3xl font-bold mb-8">Supported Media Categories</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             <div className="flex flex-col items-center p-4 rounded-lg bg-card border">
-              <Film className="w-8 h-8 text-accent mb-2" />
+              <Film className="w-8 h-8 text-red-500 mb-2" />
               <span className="font-medium">Movies</span>
             </div>
             <div className="flex flex-col items-center p-4 rounded-lg bg-card border">
-              <Tv className="w-8 h-8 text-accent mb-2" />
+              <Tv className="w-8 h-8 text-red-500 mb-2" />
               <span className="font-medium">TV Shows</span>
             </div>
             <div className="flex flex-col items-center p-4 rounded-lg bg-card border">
-              <Play className="w-8 h-8 text-accent mb-2" />
+              <Play className="w-8 h-8 text-red-500 mb-2" />
               <span className="font-medium">Anime</span>
             </div>
             <div className="flex flex-col items-center p-4 rounded-lg bg-card border">
-              <Book className="w-8 h-8 text-accent mb-2" />
+              <Book className="w-8 h-8 text-red-500 mb-2" />
               <span className="font-medium">Books/Manga</span>
             </div>
           </div>
