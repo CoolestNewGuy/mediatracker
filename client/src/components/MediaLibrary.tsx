@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { MediaItem } from "@shared/schema";
 import EditMediaModal from "./EditMediaModal";
+import EnhancedMediaContextMenu from "./EnhancedMediaContextMenu";
 
 interface MediaLibraryProps {
   onAddMedia: () => void;
@@ -31,6 +32,11 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
   const [statusFilter, setStatusFilter] = useState("all");
   const [cardSize, setCardSize] = useState<keyof typeof cardSizes>("medium");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    item: MediaItem;
+  } | null>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -40,6 +46,12 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
       setTypeFilter(selectedType);
     }
   }, [selectedType]);
+
+  useEffect(() => {
+    const handleClickOutside = () => setContextMenu(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const { data: mediaItems = [], isLoading } = useQuery<MediaItem[]>({
     queryKey: ['/api/media', typeFilter, statusFilter],
@@ -85,6 +97,15 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
     if (window.confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, item: MediaItem) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      item
+    });
   };
 
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
@@ -350,8 +371,11 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
               </div>
 
               {/* Title and Info */}
-              <div className="p-3 h-1/5 flex flex-col justify-center">
-                <h3 className="font-medium text-sm line-clamp-2 mb-1" title={item.title}>
+              <div 
+                className="p-3 h-1/5 flex flex-col justify-center cursor-pointer"
+                onContextMenu={(e) => handleContextMenu(e, item)}
+              >
+                <h3 className="font-medium text-sm leading-tight mb-1" title={item.title}>
                   {item.title}
                 </h3>
                 <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -439,6 +463,18 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
             </div>
           ))}
         </div>
+      )}
+
+      {/* Enhanced Context Menu */}
+      {contextMenu && (
+        <EnhancedMediaContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          item={contextMenu.item}
+          onClose={() => setContextMenu(null)}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       )}
 
       {/* Edit Modal */}
