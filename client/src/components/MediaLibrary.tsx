@@ -55,7 +55,7 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/media/${id}`, 'DELETE');
+      return await apiRequest('DELETE', `/api/media/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/media'] });
