@@ -4,7 +4,7 @@ import HeaderBar from "@/components/HeaderBar";
 import StatsCards from "@/components/StatsCards";
 import RecentMediaList from "@/components/RecentMediaList";
 import CurrentlyActive from "@/components/CurrentlyActive";
-import RandomPicker from "@/components/RandomPicker";
+import MediaCatalog from "@/components/MediaCatalog";
 import AchievementWidget from "@/components/AchievementWidget";
 import AddMediaModal from "@/components/AddMediaModal";
 import QuickUpdateSidebar from "@/components/QuickUpdateSidebar";
@@ -14,6 +14,7 @@ import type { MediaStats } from "@/lib/types";
 export default function Dashboard() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isQuickUpdateOpen, setIsQuickUpdateOpen] = useState(false);
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useQuery<MediaStats>({
     queryKey: ['/api/stats'],
@@ -47,7 +48,8 @@ export default function Dashboard() {
       <Sidebar 
         stats={stats} 
         onAddMedia={() => setIsAddModalOpen(true)} 
-        onQuickUpdate={() => setIsQuickUpdateOpen(true)} 
+        onQuickUpdate={() => setIsQuickUpdateOpen(true)}
+        onViewCatalog={() => setIsCatalogOpen(true)} 
       />
       
       <div className="flex-1 flex flex-col">
@@ -86,7 +88,7 @@ export default function Dashboard() {
                 isLoading={progressLoading}
                 onQuickUpdate={() => setIsQuickUpdateOpen(true)}
               />
-              <RandomPicker />
+
               <AchievementWidget 
                 achievements={achievements} 
                 isLoading={achievementsLoading} 
@@ -105,6 +107,11 @@ export default function Dashboard() {
         isOpen={isQuickUpdateOpen}
         onClose={() => setIsQuickUpdateOpen(false)}
         items={inProgressItems}
+      />
+      
+      <MediaCatalog 
+        isOpen={isCatalogOpen}
+        onClose={() => setIsCatalogOpen(false)}
       />
     </div>
   );

@@ -2,11 +2,16 @@
 
 ## Overview
 
-This is a personal media tracking platform designed to help users manage and track their entertainment consumption across multiple media types including anime, manhwa, pornhwa, novels, movies, and TV shows. The application provides comprehensive tracking capabilities with progress monitoring, statistics, achievements, and AI-powered recommendations. It serves as a digital replacement for Google Sheets-based media tracking, offering a modern web interface with rich features for media enthusiasts.
+This is a personal media tracking platform designed to help users manage and track their entertainment consumption. The platform focuses on four main media types (Movies, TV Shows, Anime, and Books/Manga) with extensible support for additional categories like novels, manhwa, manhua, pornhwa, etc. The application provides comprehensive tracking capabilities with progress monitoring, statistics, achievements, and planned AI guidance using Claude. Future features include streaming service integration (Netflix, Prime, etc.) and deployment to CoolestNewGuy.xyz domain.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Main media focus: Movies, TV Shows, Anime, Books/Manga (primary), with additional extensible categories
+Preferred AI: Claude for non-invasive guidance
+Domain: CoolestNewGuy.xyz
+Interface preference: Catalog view over random picker for browsing content
+Streaming integration: Netflix, Prime Video, and other major providers (planned)
 
 ## System Architecture
 

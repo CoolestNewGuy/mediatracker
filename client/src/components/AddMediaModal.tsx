@@ -15,7 +15,13 @@ interface AddMediaModalProps {
   onClose: () => void;
 }
 
-const mediaTypes = ['Anime', 'Manhwa', 'Pornhwa', 'Novels', 'Movies', 'TV Shows'];
+// Primary media types (main focus)
+const primaryMediaTypes = ['Movies', 'TV Shows', 'Anime', 'Books'];
+
+// Additional/Extended media types  
+const additionalMediaTypes = ['Novels', 'Manhwa', 'Manhua', 'Pornhwa'];
+
+const allMediaTypes = [...primaryMediaTypes, ...additionalMediaTypes];
 const genres = [
   'Fantasy', 'Sci-Fi', 'Romance', 'Slice of Life', 'Action', 'Adventure',
   'Comedy', 'Drama', 'Horror', 'Mystery', 'Thriller', 'Psychological',
@@ -79,9 +85,9 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
     if (type === 'Movies') {
       return ['To Watch', 'Watched', 'Dropped'];
     } else if (type === 'Anime' || type === 'TV Shows') {
-      return ['To Watch', 'In Progress', 'Watched', 'Dropped'];
-    } else if (type === 'Manhwa' || type === 'Pornhwa' || type === 'Novels') {
-      return ['To Read', 'In Progress', 'Read', 'Dropped'];
+      return ['To Watch', 'Watching', 'Completed', 'On Hold', 'Dropped'];
+    } else if (type === 'Books' || type === 'Manhwa' || type === 'Manhua' || type === 'Pornhwa' || type === 'Novels') {
+      return ['To Read', 'Reading', 'Completed', 'On Hold', 'Dropped'];
     }
     return [];
   };
@@ -94,10 +100,9 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
       status = formData.type === 'Movies' ? 'To Watch' : 
                ['Anime', 'TV Shows'].includes(formData.type) ? 'To Watch' : 'To Read';
     } else if (statusType === 'progress') {
-      status = 'In Progress';
+      status = ['Anime', 'TV Shows'].includes(formData.type || '') ? 'Watching' : 'Reading';
     } else if (statusType === 'completed') {
-      status = formData.type === 'Movies' ? 'Watched' : 
-               ['Anime', 'TV Shows'].includes(formData.type) ? 'Watched' : 'Read';
+      status = 'Completed';
     }
     
     setFormData(prev => ({ ...prev, status }));
@@ -121,7 +126,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
       if (formData.season && formData.episode) {
         progress = `S${formData.season}E${formData.episode}`;
       }
-    } else if (['Manhwa', 'Pornhwa', 'Novels'].includes(formData.type || '')) {
+    } else if (['Books', 'Manhwa', 'Manhua', 'Pornhwa', 'Novels'].includes(formData.type || '')) {
       if (formData.chapter) {
         progress = `Ch${formData.chapter}`;
       }
@@ -148,7 +153,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
 
   const showProgressFields = formData.type && formData.type !== 'Movies';
   const showSeasonField = formData.type === 'Anime' || formData.type === 'TV Shows';
-  const episodeLabel = ['Manhwa', 'Pornhwa', 'Novels'].includes(formData.type || '') ? 'Chapter' : 'Episode';
+  const episodeLabel = ['Books', 'Manhwa', 'Manhua', 'Pornhwa', 'Novels'].includes(formData.type || '') ? 'Chapter' : 'Episode';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -166,7 +171,10 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
                 <SelectValue placeholder="Select Type" />
               </SelectTrigger>
               <SelectContent className="bg-surface-2 border-gray-600">
-                {mediaTypes.map(type => (
+                {primaryMediaTypes.map(type => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+                {additionalMediaTypes.map(type => (
                   <SelectItem key={type} value={type}>{type}</SelectItem>
                 ))}
               </SelectContent>
@@ -243,7 +251,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
                     id="season"
                     type="number"
                     min="1"
-                    value={formData.season}
+                    value={formData.season || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, season: parseInt(e.target.value) || 1 }))}
                     className="bg-surface-2 border-gray-600"
                   />
@@ -256,7 +264,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
                   id="episode"
                   type="number"
                   min="0"
-                  value={showSeasonField ? formData.episode : formData.chapter}
+                  value={showSeasonField ? (formData.episode || '') : (formData.chapter || '')}
                   onChange={(e) => {
                     const value = parseInt(e.target.value) || 0;
                     if (showSeasonField) {
@@ -274,7 +282,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
           {/* Genre */}
           <div>
             <Label htmlFor="genre">Genre</Label>
-            <Select value={formData.genre} onValueChange={(value) => setFormData(prev => ({ ...prev, genre: value }))}>
+            <Select value={formData.genre || ''} onValueChange={(value) => setFormData(prev => ({ ...prev, genre: value }))}>
               <SelectTrigger className="bg-surface-2 border-gray-600">
                 <SelectValue placeholder="Select Genre" />
               </SelectTrigger>
@@ -291,7 +299,7 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
             <Label htmlFor="notes">Notes (Optional)</Label>
             <Textarea
               id="notes"
-              value={formData.notes}
+              value={formData.notes || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               className="bg-surface-2 border-gray-600"
               placeholder="Any additional notes..."
