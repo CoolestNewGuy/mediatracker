@@ -1,4 +1,4 @@
-import { Film, TvIcon, Book, BookOpen, Heart, PlayCircle, Plus, Search, Library, Clock, Trophy, Settings, Download, ChartLine, Grid, Sparkles } from "lucide-react";
+import { Film, TvIcon, Book, BookOpen, Heart, PlayCircle, Plus, Search, Library, Clock, Trophy, Settings, Download, ChartLine, Grid, Sparkles, Table } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import type { MediaStats } from "@/lib/types";
 
@@ -58,6 +58,12 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
           }`}>
             <Library size={16} />
             <span>Full Library</span>
+          </Link>
+          <Link href="/media" className={`sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+            location === '/media' ? 'text-white bg-[#7A1927]' : 'text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-[#7A1927]'
+          }`}>
+            <Table size={16} />
+            <span>All Media</span>
           </Link>
           <Link href="/achievements" className={`sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
             location === '/achievements' ? 'text-white bg-[#7A1927]' : 'text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-[#7A1927]'
