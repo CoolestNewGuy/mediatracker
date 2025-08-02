@@ -11,15 +11,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes (simplified without authentication)
   app.get('/api/auth/user', async (req: any, res) => {
     try {
-      const user = await storage.getUser(DEFAULT_USER_ID);
-      res.json(user || { id: DEFAULT_USER_ID, email: "user@example.com" });
+      let user = await storage.getUser(DEFAULT_USER_ID);
+      
+      // Create default user if it doesn't exist
+      if (!user) {
+        user = await storage.upsertUser({
+          id: DEFAULT_USER_ID,
+          email: "user@example.com",
+          firstName: "Demo",
+          lastName: "User",
+          profileImageUrl: null
+        });
+      }
+      
+      res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
-  // Media routes
+  // Media routes - specific routes first, then parameterized routes
+  app.get("/api/media/in-progress", async (req: any, res) => {
+    try {
+      const items = await storage.getInProgressItems(DEFAULT_USER_ID);
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching in-progress items:", error);
+      res.status(500).json({ error: "Failed to fetch in-progress items" });
+    }
+  });
+
   app.get("/api/media", async (req: any, res) => {
     try {
       const { type, status } = req.query;
@@ -92,14 +114,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Progress routes
-  app.get("/api/media/in-progress", async (req: any, res) => {
-    try {
-      const items = await storage.getInProgressItems(DEFAULT_USER_ID);
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch in-progress items" });
-    }
-  });
 
   app.post("/api/media/:id/increment", async (req: any, res) => {
     try {
@@ -401,6 +415,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Points and Daily Login routes
   app.post("/api/daily-login", async (req: any, res) => {
     try {
+      // Ensure user exists before checking daily login
+      let user = await storage.getUser(DEFAULT_USER_ID);
+      if (!user) {
+        user = await storage.upsertUser({
+          id: DEFAULT_USER_ID,
+          email: "user@example.com",
+          firstName: "Demo",
+          lastName: "User",
+          profileImageUrl: null
+        });
+      }
+      
       const result = await storage.checkAndClaimDailyLogin(DEFAULT_USER_ID);
       res.json(result);
     } catch (error) {
