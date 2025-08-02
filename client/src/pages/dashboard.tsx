@@ -11,6 +11,7 @@ import MediaCatalog from "@/components/MediaCatalog";
 import AchievementWidget from "@/components/AchievementWidget";
 import AddMediaModal from "@/components/AddMediaModal";
 import QuickUpdateSidebar from "@/components/QuickUpdateSidebar";
+import RandomPicker from "@/components/RandomPicker";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
@@ -137,6 +138,8 @@ export default function Dashboard() {
                 isLoading={progressLoading}
                 onQuickUpdate={() => setIsQuickUpdateOpen(true)}
               />
+
+              <RandomPicker />
 
               <AchievementWidget 
                 achievements={achievements} 

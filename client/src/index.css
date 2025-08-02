@@ -13,7 +13,7 @@
   --card-foreground: hsl(0, 0%, 98%);
   --border: hsl(240, 3.7%, 15.9%);
   --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(346, 63%, 32%);
+  --primary: hsl(353, 68%, 32%);  /* #7A1927 */
   --primary-foreground: hsl(0, 0%, 98%);
   --secondary: hsl(240, 3.7%, 15.9%);
   --secondary-foreground: hsl(0, 0%, 98%);
@@ -21,18 +21,18 @@
   --accent-foreground: hsl(0, 0%, 98%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
-  --radius: 0.5rem;
+  --ring: hsl(353, 68%, 32%);
+  --radius: 0.75rem;
 
-  /* Custom media tracker colors */
-  --surface: hsl(0, 0%, 10%);
-  --surface-2: hsl(0, 0%, 16%);
-  --surface-3: hsl(0, 0%, 22%);
-  --accent-red: hsl(0, 75%, 55%);
-  --primary-red: hsl(0, 75%, 50%);
-  --red-hover: hsl(0, 75%, 45%);
-  --red-muted: hsl(0, 50%, 35%);
-  --red-light: hsl(0, 65%, 60%);
+  /* Custom media tracker colors - exact match to your specs */
+  --surface: hsl(0, 0%, 8%);      /* #141414 */
+  --surface-2: hsl(0, 0%, 12%);   /* #1f1f1f */
+  --surface-3: hsl(0, 0%, 16%);   /* #292929 */
+  --accent-red: hsl(353, 68%, 32%);    /* #7A1927 primary red */
+  --primary-red: hsl(353, 68%, 35%);   /* slightly lighter */
+  --red-hover: hsl(353, 68%, 42%);     /* hover state */
+  --red-muted: hsl(353, 50%, 28%);     /* muted variant */
+  --red-light: hsl(353, 60%, 55%);     /* light variant */
 }
 
 .dark {
@@ -65,8 +65,27 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    background: #0a0a0a;
+    background: #0a0a0a !important;
     font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #0a0a0a;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #7A1927;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9d2332;
   }
 }
 

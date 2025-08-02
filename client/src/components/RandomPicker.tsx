@@ -80,7 +80,7 @@ export default function RandomPicker() {
       <Button 
         onClick={handleRandomPick}
         disabled={randomPickMutation.isPending}
-        className="w-full bg-primary-red hover:bg-primary-red/90 py-3 font-medium"
+        className="w-full bg-[#7A1927] hover:bg-[#9d2332] py-3 font-medium text-white"
       >
         <Dice6 className="w-4 h-4 mr-2" />
         {randomPickMutation.isPending ? 'Picking...' : 'Pick Something Random!'}

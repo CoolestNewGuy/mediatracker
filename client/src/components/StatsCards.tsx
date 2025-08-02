@@ -15,7 +15,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       value: stats?.total || 0,
       subtitle: "+5 this week",
       icon: List,
-      color: "bg-red-500/20 text-red-500",
+      color: "bg-[#7A1927]/20 text-[#7A1927]",
     },
     {
       title: "Completed",
@@ -29,7 +29,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       value: stats?.inProgressCount || 0,
       subtitle: "Active watching",
       icon: Play,
-      color: "bg-red-500/20 text-red-500",
+      color: "bg-[#7A1927]/20 text-[#7A1927]",
     },
     {
       title: "Time Spent",

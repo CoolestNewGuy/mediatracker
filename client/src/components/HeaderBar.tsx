@@ -30,7 +30,7 @@ export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
         <div className="flex items-center space-x-4">
           <h2 className="text-2xl font-bold">Dashboard</h2>
           <div className="flex items-center space-x-2 bg-surface-2 rounded-lg px-3 py-1">
-            <Flame className="text-red-500 w-4 h-4" />
+            <Flame className="text-[#7A1927] w-4 h-4" />
             <span className="text-sm font-medium">7 day streak!</span>
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
           {/* Quick Add Button */}
           <Button 
             onClick={onAddMedia}
-            className="bg-red-500 hover:bg-red-600 transition-colors"
+            className="bg-[#7A1927] hover:bg-[#9d2332] transition-colors text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Media
@@ -66,7 +66,7 @@ export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
               >
                 <Avatar className="w-6 h-6">
                   <AvatarImage src={typedUser?.profileImageUrl || ""} />
-                  <AvatarFallback className="bg-red-500 text-white text-xs">
+                  <AvatarFallback className="bg-[#7A1927] text-white text-xs">
                     {typedUser?.firstName?.charAt(0) || typedUser?.email?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
