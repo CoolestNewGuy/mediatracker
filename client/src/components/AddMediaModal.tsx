@@ -6,8 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { Search, Tags, X } from "lucide-react";
+import MediaSearch from "@/components/MediaSearch";
+import GenreSelector from "@/components/GenreSelector";
 import type { InsertMediaItem } from "@shared/schema";
 
 interface AddMediaModalProps {
@@ -33,7 +37,15 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
     season: 1,
     episode: 0,
     chapter: 0,
+    imageUrl: '',
+    description: '',
+    externalId: '',
+    releaseYear: undefined,
   });
+  
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isGenreModalOpen, setIsGenreModalOpen] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -73,7 +85,37 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
       season: 1,
       episode: 0,
       chapter: 0,
+      imageUrl: '',
+      description: '',
+      externalId: '',
+      releaseYear: undefined,
     });
+    setSelectedGenres([]);
+  };
+
+  const handleSearchResult = (result: any) => {
+    setFormData(prev => ({
+      ...prev,
+      title: result.title,
+      imageUrl: result.imageUrl || '',
+      description: result.description || '',
+      externalId: result.externalId || '',
+      releaseYear: result.releaseYear || undefined,
+    }));
+    
+    if (result.genres && result.genres.length > 0) {
+      setSelectedGenres(result.genres);
+    }
+    
+    setIsSearchOpen(false);
+  };
+
+  const handleGenresChange = (genres: string[]) => {
+    setSelectedGenres(genres);
+    setFormData(prev => ({
+      ...prev,
+      genre: genres.join(', ')
+    }));
   };
 
   const getStatusOptions = (type: string) => {
@@ -134,12 +176,16 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
       season: formData.season,
       episode: formData.episode,
       chapter: formData.chapter,
-      genre: formData.genre || null,
+      genre: selectedGenres.length > 0 ? selectedGenres.join(', ') : null,
       notes: formData.notes || null,
       rating: null,
       dateCompleted: null,
       timeSpent: null,
       isArchived: false,
+      imageUrl: formData.imageUrl || null,
+      description: formData.description || null,
+      externalId: formData.externalId || null,
+      releaseYear: formData.releaseYear || null,
     };
 
     addMediaMutation.mutate(submitData);
@@ -172,16 +218,33 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
             </Select>
           </div>
 
-          {/* Title */}
+          {/* Title with Search Button */}
           <div>
             <Label htmlFor="title">Title*</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              className="bg-surface-2 border-gray-600"
-              placeholder="Enter media title"
-            />
+            <div className="flex space-x-2">
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                className="bg-surface-2 border-gray-600 flex-1"
+                placeholder="Enter media title"
+              />
+              {formData.type && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsSearchOpen(true)}
+                  className="bg-[#7A1927] hover:bg-[#9d2332] border-[#7A1927] text-white"
+                >
+                  <Search className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+            {formData.type && (
+              <p className="text-xs text-gray-400 mt-1">
+                Click the search button to find {formData.type.toLowerCase()} from external databases
+              </p>
+            )}
           </div>
 
           {/* Status */}
@@ -270,20 +333,61 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
             </div>
           )}
 
-          {/* Genre */}
+          {/* Genres (Multi-select) */}
           <div>
-            <Label htmlFor="genre">Genre</Label>
-            <Select value={formData.genre || ''} onValueChange={(value) => setFormData(prev => ({ ...prev, genre: value }))}>
-              <SelectTrigger className="bg-surface-2 border-gray-600">
-                <SelectValue placeholder="Select Genre" />
-              </SelectTrigger>
-              <SelectContent className="bg-surface-2 border-gray-600">
-                {genres.map(genre => (
-                  <SelectItem key={genre} value={genre}>{genre}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="genre">Genres</Label>
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsGenreModalOpen(true)}
+                className="w-full bg-surface-2 border-gray-600 justify-start text-left"
+              >
+                <Tags className="w-4 h-4 mr-2" />
+                {selectedGenres.length > 0 
+                  ? `${selectedGenres.length} genre${selectedGenres.length > 1 ? 's' : ''} selected`
+                  : 'Select genres...'
+                }
+              </Button>
+              
+              {selectedGenres.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {selectedGenres.map((genre) => (
+                    <Badge 
+                      key={genre} 
+                      variant="secondary" 
+                      className="bg-[#7A1927] text-white"
+                    >
+                      {genre}
+                      <X 
+                        className="w-3 h-3 ml-1 cursor-pointer" 
+                        onClick={() => {
+                          const newGenres = selectedGenres.filter(g => g !== genre);
+                          setSelectedGenres(newGenres);
+                          setFormData(prev => ({ ...prev, genre: newGenres.join(', ') }));
+                        }}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Description (from search) */}
+          {formData.description && (
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                className="bg-surface-2 border-gray-600"
+                rows={3}
+                placeholder="Media description..."
+              />
+            </div>
+          )}
 
           {/* Notes */}
           <div>
@@ -317,6 +421,22 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
             </Button>
           </div>
         </form>
+        
+        {/* Search Modal */}
+        <MediaSearch
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
+          mediaType={formData.type || ''}
+          onSelect={handleSearchResult}
+        />
+        
+        {/* Genre Selection Modal */}
+        <GenreSelector
+          isOpen={isGenreModalOpen}
+          onClose={() => setIsGenreModalOpen(false)}
+          selectedGenres={selectedGenres}
+          onGenresChange={handleGenresChange}
+        />
       </DialogContent>
     </Dialog>
   );

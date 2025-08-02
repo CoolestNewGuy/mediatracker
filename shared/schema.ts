@@ -47,13 +47,17 @@ export const mediaItems = pgTable("media_items", {
   season: integer("season"),
   episode: integer("episode"),
   chapter: integer("chapter"),
-  genre: text("genre"),
+  genre: text("genre"), // Can store multiple genres as comma-separated values
   notes: text("notes"),
   rating: integer("rating"),
   dateAdded: timestamp("date_added").default(sql`now()`),
   dateCompleted: timestamp("date_completed"),
   timeSpent: integer("time_spent"), // in minutes
   isArchived: boolean("is_archived").default(false),
+  imageUrl: text("image_url"), // Cover image URL
+  description: text("description"), // Plot/synopsis
+  externalId: text("external_id"), // ID from external database (TMDB, AniList, etc.)
+  releaseYear: integer("release_year"),
 });
 
 export const achievements = pgTable("achievements", {
