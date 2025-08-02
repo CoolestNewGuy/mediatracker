@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { X, Filter, Search, Grid, List, Star, Clock, Check, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ const statusIcons = {
   'Dropped': X,
 };
 
-export default function MediaCatalog({ isOpen, onClose }: MediaCatalogProps) {
+const MediaCatalog: React.FC<MediaCatalogProps> = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -250,4 +250,6 @@ export default function MediaCatalog({ isOpen, onClose }: MediaCatalogProps) {
       </div>
     </div>
   );
-}
+};
+
+export default MediaCatalog;
