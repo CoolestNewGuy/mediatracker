@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { User as UserType } from "@shared/schema";
 
 interface HeaderBarProps {
   onAddMedia: () => void;
@@ -20,6 +21,8 @@ interface HeaderBarProps {
 export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  
+  const typedUser = user as UserType | undefined;
 
   return (
     <header className="bg-surface border-b border-gray-700 px-6 py-4">
@@ -62,13 +65,13 @@ export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
                 className="flex items-center space-x-2 bg-surface-2 border-gray-600 hover:bg-surface-3"
               >
                 <Avatar className="w-6 h-6">
-                  <AvatarImage src={user?.profileImageUrl || ""} />
+                  <AvatarImage src={typedUser?.profileImageUrl || ""} />
                   <AvatarFallback className="bg-primary-red text-white text-xs">
-                    {user?.firstName?.charAt(0) || user?.email?.charAt(0) || "U"}
+                    {typedUser?.firstName?.charAt(0) || typedUser?.email?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-sm">
-                  {user?.firstName || user?.email?.split('@')[0] || "User"}
+                  {typedUser?.firstName || typedUser?.email?.split('@')[0] || "User"}
                 </span>
                 <ChevronDown className="w-4 h-4" />
               </Button>
@@ -77,12 +80,12 @@ export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium">
-                    {user?.firstName && user?.lastName 
-                      ? `${user.firstName} ${user.lastName}`
-                      : user?.email?.split('@')[0] || "User"
+                    {typedUser?.firstName && typedUser?.lastName 
+                      ? `${typedUser.firstName} ${typedUser.lastName}`
+                      : typedUser?.email?.split('@')[0] || "User"
                     }
                   </p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground">{typedUser?.email}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
