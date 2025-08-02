@@ -12,7 +12,13 @@ Preferred AI: Claude for non-invasive guidance
 Domain: CoolestNewGuy.xyz
 Interface preference: Catalog view over random picker for browsing content
 Streaming integration: Netflix, Prime Video, and other major providers (planned)
-Authentication: Replit Auth for secure user sessions (implemented 2025-01-02)
+Authentication: Simplified for development (Replit Auth removed for GitHub transition 2025-01-02)
+
+### GitHub Transition (2025-01-02)
+- Project prepared for GitHub repository with comprehensive documentation
+- All authentication simplified to demo mode for easier deployment
+- Enhanced context menus with platform-specific links implemented
+- Ready for production deployment on multiple platforms
 
 ### Development Focus (Updated 2025-01-02)
 - **Practical over fancy**: Focus on working functionality with every button working
