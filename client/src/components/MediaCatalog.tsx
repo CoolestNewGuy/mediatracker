@@ -152,17 +152,36 @@ const MediaCatalog: React.FC<MediaCatalogProps> = ({ isOpen, onClose }) => {
                 {filteredItems.map((item) => {
                   const StatusIcon = statusIcons[item.status as keyof typeof statusIcons];
                   return (
-                    <Card key={item.id} className="bg-surface-1 border-border hover:bg-surface-2 transition-colors">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <CardTitle className="text-sm font-medium line-clamp-2 text-foreground">
-                            {item.title}
-                          </CardTitle>
-                          <Badge className={`ml-2 ${statusColors[item.status as keyof typeof statusColors]} flex items-center gap-1`}>
-                            <StatusIcon className="h-3 w-3" />
-                            {item.status}
-                          </Badge>
+                    <Card key={item.id} className="bg-surface-1 border-border hover:bg-surface-2 transition-colors overflow-hidden">
+                      {/* Image */}
+                      <div className="aspect-[3/4] relative bg-gray-800">
+                        {item.imageUrl ? (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`absolute inset-0 flex items-center justify-center bg-gray-800 ${item.imageUrl ? 'hidden' : ''}`}>
+                          <div className="text-center text-gray-400">
+                            <div className="text-4xl mb-2">📺</div>
+                            <div className="text-xs px-2">{item.title}</div>
+                          </div>
                         </div>
+                        <Badge className={`absolute top-2 right-2 ${statusColors[item.status as keyof typeof statusColors]} flex items-center gap-1`}>
+                          <StatusIcon className="h-3 w-3" />
+                          {item.status}
+                        </Badge>
+                      </div>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium line-clamp-2 text-foreground">
+                          {item.title}
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="pt-0">
                         <div className="space-y-2">
