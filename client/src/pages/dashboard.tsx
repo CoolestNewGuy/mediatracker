@@ -9,6 +9,7 @@ import CurrentlyActive from "@/components/CurrentlyActive";
 import MediaCatalog from "@/components/MediaCatalog";
 import StatsOverview from "@/components/StatsOverview";
 import CatalogPreview from "@/components/CatalogPreview";
+import SmartCollections from "@/components/SmartCollections";
 import AchievementWidget from "@/components/AchievementWidget";
 import AddMediaModal from "@/components/AddMediaModal";
 import QuickUpdateSidebar from "@/components/QuickUpdateSidebar";
@@ -76,7 +77,10 @@ export default function Dashboard() {
         <HeaderBar onAddMedia={() => setIsAddModalOpen(true)} />
         
         <main className="flex-1 p-6 overflow-y-auto">
-          <StatsCards stats={stats} />
+          <div className="space-y-6">
+            <SmartCollections onOpenCatalog={() => setIsCatalogOpen(true)} />
+            <StatsCards stats={stats} />
+          </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
             <div className="lg:col-span-2 space-y-6">
