@@ -16,12 +16,16 @@ export default function CurrentlyWatched() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: inProgressItems = [], isLoading } = useQuery<MediaItem[]>({
-    queryKey: ['/api/media', 'in-progress'],
+  const { data: inProgressItems = [], isLoading, error } = useQuery<MediaItem[]>({
+    queryKey: ['/api/media/in-progress'],
     queryFn: async () => {
-      const response = await fetch('/api/media?status=In Progress');
+      const response = await fetch('/api/media/in-progress');
+      if (!response.ok) {
+        throw new Error('Failed to fetch in-progress items');
+      }
       return response.json();
-    }
+    },
+    retry: false
   });
 
   const deleteMutation = useMutation({
@@ -134,9 +138,15 @@ export default function CurrentlyWatched() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {inProgressItems.length === 0 ? (
+          {error ? (
             <div className="text-gray-400 text-center py-8">
-              No items currently in progress
+              <div className="text-sm">No items in progress yet</div>
+              <div className="text-xs mt-1 text-gray-500">Add some media and mark them as "In Progress" to see them here</div>
+            </div>
+          ) : inProgressItems.length === 0 ? (
+            <div className="text-gray-400 text-center py-8">
+              <div className="text-sm">No items currently in progress</div>
+              <div className="text-xs mt-1 text-gray-500">Start watching or reading something new!</div>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
