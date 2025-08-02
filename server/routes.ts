@@ -233,6 +233,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // External media search
+  app.get("/api/search-external", async (req: any, res) => {
+    try {
+      const { query, type } = req.query;
+      if (!query || !type) {
+        return res.status(400).json({ error: "Query and type parameters are required" });
+      }
+
+      let results: any[] = [];
+
+      // Mock external API responses for now (in production, you'd use real APIs)
+      // This simulates TMDB, AniList, or other media databases
+      if (type === 'Movies' || type === 'TV Shows') {
+        // Simulate TMDB API response
+        results = [
+          {
+            id: `tmdb_${Math.random()}`,
+            title: `${query} - Sample Movie`,
+            imageUrl: `https://via.placeholder.com/300x450/333/fff?text=${encodeURIComponent(query)}`,
+            description: "This is a sample movie description that would come from TMDB API. In production, this would be real data from The Movie Database.",
+            releaseYear: 2023,
+            genres: ['Action', 'Adventure', 'Sci-Fi'],
+            externalId: `tmdb_123456`
+          },
+          {
+            id: `tmdb_${Math.random()}`,
+            title: `${query} 2: The Sequel`,
+            imageUrl: `https://via.placeholder.com/300x450/444/fff?text=${encodeURIComponent(query + '2')}`,
+            description: "Another sample movie that matches your search. Real implementation would fetch from TMDB.",
+            releaseYear: 2024,
+            genres: ['Drama', 'Thriller'],
+            externalId: `tmdb_789012`
+          }
+        ];
+      } else if (type === 'Anime') {
+        // Simulate AniList API response
+        results = [
+          {
+            id: `anilist_${Math.random()}`,
+            title: `${query} - Anime Series`,
+            imageUrl: `https://via.placeholder.com/300x450/555/fff?text=${encodeURIComponent(query)}`,
+            description: "Sample anime description from AniList API. Would contain real plot synopsis in production.",
+            releaseYear: 2023,
+            genres: ['Action', 'Supernatural', 'Shounen'],
+            externalId: `anilist_54321`
+          }
+        ];
+      } else if (type === 'Manhwa' || type === 'Novels') {
+        // Simulate manga/novel database response
+        results = [
+          {
+            id: `manga_${Math.random()}`,
+            title: `${query} - Manhwa/Novel`,
+            imageUrl: `https://via.placeholder.com/300x450/666/fff?text=${encodeURIComponent(query)}`,
+            description: "Sample manhwa/novel description. In production, this would come from MangaDex or similar APIs.",
+            releaseYear: 2022,
+            genres: ['Romance', 'Fantasy', 'Slice of Life'],
+            externalId: `manga_98765`
+          }
+        ];
+      }
+
+      // Filter results based on query similarity (basic implementation)
+      const filteredResults = results.filter(result => 
+        result.title.toLowerCase().includes(query.toLowerCase())
+      );
+
+      res.json(filteredResults);
+    } catch (error) {
+      console.error("External search error:", error);
+      res.status(500).json({ error: "Failed to search external databases" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
