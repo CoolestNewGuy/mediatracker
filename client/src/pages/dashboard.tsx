@@ -14,7 +14,8 @@ import QuickUpdateSidebar from "@/components/QuickUpdateSidebar";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
-import type { MediaStats } from "@/lib/types";
+import type { MediaStats, QuickUpdateItem } from "@/lib/types";
+import type { MediaItem, Achievement } from "@shared/schema";
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -43,17 +44,17 @@ export default function Dashboard() {
     enabled: isAuthenticated,
   });
 
-  const { data: recentItems, isLoading: recentLoading, error: recentError } = useQuery({
+  const { data: recentItems, isLoading: recentLoading, error: recentError } = useQuery<MediaItem[]>({
     queryKey: ['/api/recent'],
     enabled: isAuthenticated,
   });
 
-  const { data: inProgressItems, isLoading: progressLoading, error: progressError } = useQuery({
+  const { data: inProgressItems, isLoading: progressLoading, error: progressError } = useQuery<MediaItem[]>({
     queryKey: ['/api/media/in-progress'],
     enabled: isAuthenticated,
   });
 
-  const { data: achievements, isLoading: achievementsLoading, error: achievementsError } = useQuery({
+  const { data: achievements, isLoading: achievementsLoading, error: achievementsError } = useQuery<Achievement[]>({
     queryKey: ['/api/achievements'],
     enabled: isAuthenticated,
   });
@@ -154,7 +155,7 @@ export default function Dashboard() {
       <QuickUpdateSidebar 
         isOpen={isQuickUpdateOpen}
         onClose={() => setIsQuickUpdateOpen(false)}
-        items={inProgressItems}
+        items={inProgressItems as QuickUpdateItem[] | undefined}
       />
       
       <MediaCatalog 
