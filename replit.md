@@ -14,6 +14,14 @@ Interface preference: Catalog view over random picker for browsing content
 Streaming integration: Netflix, Prime Video, and other major providers (planned)
 Authentication: Replit Auth for secure user sessions (implemented 2025-01-02)
 
+### Development Focus (Updated 2025-01-02)
+- **Practical over fancy**: Focus on working functionality rather than complex UI
+- **Performance first**: Optimize images, add pagination, proper indexing
+- **Real APIs**: Use AniList (no key needed), TMDB (free key), avoid mock data
+- **Keyboard shortcuts**: A (add), L (library), Space (quick update), / (search), ? (help)
+- **Quick operations**: Bulk select, fuzzy search, smart continue watching
+- **Import/Export**: Support MAL XML, AniList JSON, Goodreads CSV formats
+
 ## System Architecture
 
 ### Frontend Architecture

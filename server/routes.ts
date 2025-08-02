@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // External media search
+  // External media search with real APIs
   app.get("/api/search-external", async (req: any, res) => {
     try {
       const { query, type } = req.query;
@@ -243,71 +243,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let results: any[] = [];
 
-      // Mock external API responses for now (in production, you'd use real APIs)
-      // This simulates TMDB, AniList, or other media databases
-      if (type === 'Movies' || type === 'TV Shows') {
-        // Simulate TMDB API response
-        results = [
-          {
-            id: `tmdb_${Math.random()}`,
-            title: `${query} - Sample Movie`,
-            imageUrl: `https://via.placeholder.com/300x450/333/fff?text=${encodeURIComponent(query)}`,
-            description: "This is a sample movie description that would come from TMDB API. In production, this would be real data from The Movie Database.",
-            releaseYear: 2023,
-            genres: ['Action', 'Adventure', 'Sci-Fi'],
-            externalId: `tmdb_123456`
-          },
-          {
-            id: `tmdb_${Math.random()}`,
-            title: `${query} 2: The Sequel`,
-            imageUrl: `https://via.placeholder.com/300x450/444/fff?text=${encodeURIComponent(query + '2')}`,
-            description: "Another sample movie that matches your search. Real implementation would fetch from TMDB.",
-            releaseYear: 2024,
-            genres: ['Drama', 'Thriller'],
-            externalId: `tmdb_789012`
+      if (type === 'Anime') {
+        // AniList GraphQL API (no key needed)
+        try {
+          const graphqlQuery = `
+            query ($search: String) {
+              Page(perPage: 5) {
+                media(search: $search, type: ANIME) {
+                  id
+                  title {
+                    romaji
+                    english
+                  }
+                  coverImage {
+                    large
+                  }
+                  episodes
+                  description
+                  genres
+                  startDate {
+                    year
+                  }
+                }
+              }
+            }
+          `;
+
+          const response = await fetch('https://graphql.anilist.co', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: graphqlQuery,
+              variables: { search: query }
+            })
+          });
+
+          const data = await response.json();
+          if (data.data?.Page?.media) {
+            results = data.data.Page.media.map((item: any) => ({
+              title: item.title.english || item.title.romaji,
+              imageUrl: item.coverImage.large,
+              description: item.description?.replace(/<[^>]*>/g, '').substring(0, 200) + '...',
+              releaseYear: item.startDate?.year,
+              genres: item.genres?.slice(0, 3) || [],
+              externalId: `anilist_${item.id}`,
+              episodes: item.episodes
+            }));
           }
-        ];
-      } else if (type === 'Anime') {
-        // Simulate AniList API response
-        results = [
-          {
-            id: `anilist_${Math.random()}`,
-            title: `${query} - Anime Series`,
-            imageUrl: `https://via.placeholder.com/300x450/555/fff?text=${encodeURIComponent(query)}`,
-            description: "Sample anime description from AniList API. Would contain real plot synopsis in production.",
-            releaseYear: 2023,
-            genres: ['Action', 'Supernatural', 'Shounen'],
-            externalId: `anilist_54321`
+        } catch (error) {
+          console.error('AniList API error:', error);
+        }
+      } else if (type === 'Movies' || type === 'TV Shows') {
+        // TMDB API - fallback to mock if no API key
+        const TMDB_KEY = process.env.TMDB_API_KEY;
+        if (TMDB_KEY) {
+          try {
+            const mediaType = type === 'Movies' ? 'movie' : 'tv';
+            const response = await fetch(
+              `https://api.themoviedb.org/3/search/${mediaType}?api_key=${TMDB_KEY}&query=${encodeURIComponent(query)}`
+            );
+            const data = await response.json();
+            
+            if (data.results) {
+              results = data.results.slice(0, 5).map((item: any) => ({
+                title: item.title || item.name,
+                imageUrl: item.poster_path ? `https://image.tmdb.org/t/p/w300${item.poster_path}` : null,
+                description: item.overview,
+                releaseYear: item.release_date ? parseInt(item.release_date.split('-')[0]) : 
+                           item.first_air_date ? parseInt(item.first_air_date.split('-')[0]) : null,
+                genres: [], // Would need additional API call for genres
+                externalId: `tmdb_${item.id}`
+              }));
+            }
+          } catch (error) {
+            console.error('TMDB API error:', error);
           }
-        ];
-      } else if (type === 'Manhwa' || type === 'Novels') {
-        // Simulate manga/novel database response
-        results = [
-          {
-            id: `manga_${Math.random()}`,
-            title: `${query} - Manhwa/Novel`,
-            imageUrl: `https://via.placeholder.com/300x450/666/fff?text=${encodeURIComponent(query)}`,
-            description: "Sample manhwa/novel description. In production, this would come from MangaDex or similar APIs.",
-            releaseYear: 2022,
-            genres: ['Romance', 'Fantasy', 'Slice of Life'],
-            externalId: `manga_98765`
-          }
-        ];
+        }
       }
 
-      // Filter results based on query similarity (basic implementation)
-      const filteredResults = results.filter(result => 
-        result.title.toLowerCase().includes(query.toLowerCase())
-      );
+      // Fallback to basic search if no results from APIs
+      if (results.length === 0) {
+        results = [{
+          title: query,
+          imageUrl: null,
+          description: `Search result for "${query}". Add TMDB_API_KEY to environment for enhanced ${type} search.`,
+          releaseYear: new Date().getFullYear(),
+          genres: [],
+          externalId: `manual_${Date.now()}`
+        }];
+      }
 
-      res.json(filteredResults);
+      res.json(results);
     } catch (error) {
       console.error("External search error:", error);
       res.status(500).json({ error: "Failed to search external databases" });
     }
   });
 
+  // Bulk operations
+  app.patch("/api/bulk/update", async (req: any, res) => {
+    try {
+      const { ids, updates } = req.body;
+      
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'IDs array is required' });
+      }
+      
+      if (!updates || typeof updates !== 'object') {
+        return res.status(400).json({ error: 'Updates object is required' });
+      }
 
+      const results = [];
+      for (const id of ids) {
+        try {
+          const item = await storage.getMediaItem(id, DEFAULT_USER_ID);
+          if (item) {
+            const updatedItem = await storage.updateMediaItem(id, DEFAULT_USER_ID, updates);
+            results.push(updatedItem);
+          }
+        } catch (error) {
+          console.error(`Failed to update item ${id}:`, error);
+        }
+      }
+
+      res.json({ updated: results.length, items: results });
+    } catch (error) {
+      console.error('Bulk update error:', error);
+      res.status(500).json({ error: 'Failed to update items' });
+    }
+  });
+
+  app.delete("/api/bulk/delete", async (req: any, res) => {
+    try {
+      const { ids } = req.body;
+      
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'IDs array is required' });
+      }
+
+      let deletedCount = 0;
+      for (const id of ids) {
+        try {
+          await storage.deleteMediaItem(id, DEFAULT_USER_ID);
+          deletedCount++;
+        } catch (error) {
+          console.error(`Failed to delete item ${id}:`, error);
+        }
+      }
+
+      res.json({ deleted: deletedCount });
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+      res.status(500).json({ error: 'Failed to delete items' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

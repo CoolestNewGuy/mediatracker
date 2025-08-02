@@ -1,0 +1,214 @@
+Right, my bad - got carried away there. Let's focus on practical, immediate improvements.
+
+## 🏆 **Simple Leaderboard Implementation**
+
+```typescript
+// Add to your API routes
+GET /api/leaderboard?category=anime&period=week&limit=10
+
+// Categories: anime, movies, tv-shows, manhwa, novels, all
+// Periods: week, month, year, all-time
+// Metrics: episodes, chapters, titles, hours
+
+// Simple component
+function Leaderboard() {
+  return (
+    <div className="grid gap-4">
+      <Select options={['This Week', 'This Month', 'All Time']} />
+      <Select options={['All Media', 'Anime', 'Movies', 'Manhwa']} />
+      
+      {leaders.map((user, idx) => (
+        <div className="flex items-center gap-4 p-4 bg-surface-2 rounded">
+          <span className="text-2xl font-bold">#{idx + 1}</span>
+          <span>{user.username}</span>
+          <span className="ml-auto">{user.count} episodes</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## 🔥 **Immediate High-Impact Features**
+
+### **1. Fix Your Broken Shit First**
+- Delete duplicate route (line 311 in routes.ts)
+- Implement the auto-search that's referenced but missing
+- Add actual edit functionality (you have the button, no action)
+- Connect real APIs instead of mock data
+
+### **2. Progress Tracking That Matters**
+```typescript
+// Quick progress update from any page
+// Keyboard shortcut: Spacebar opens quick update
+// Type "aot 5" → updates Attack on Titan to episode 5
+// Type "+3" → adds 3 to current progress
+```
+
+### **3. Import/Export**
+```typescript
+// One-click import from:
+- MyAnimeList (XML export)
+- Anilist (JSON)
+- Goodreads (CSV)
+- Manual CSV with your format
+
+// Export for backup/sharing
+```
+
+### **4. Smart Continue Watching**
+```typescript
+// Homepage shows:
+- "Continue Watching" - sorted by last updated
+- "Next Episode Airs" - for ongoing series
+- "Almost Finished" - 80%+ complete
+- "Started but Abandoned" - no updates in 30+ days
+```
+
+### **5. Bulk Operations**
+```typescript
+// Select multiple items → 
+- Mark as watched/read
+- Change status
+- Add to collection
+- Delete
+
+// Shift+click for range select
+// Ctrl+click for individual
+```
+
+## 💻 **Technical Fixes**
+
+### **1. Performance**
+```typescript
+// You're fetching ALL media every time
+// Add pagination:
+const PAGE_SIZE = 50;
+
+// Index your database:
+CREATE INDEX idx_media_user_type ON media_items(userId, type);
+CREATE INDEX idx_media_status ON media_items(status);
+```
+
+### **2. Image Optimization**
+```typescript
+// Stop loading full-size images
+const ImageComponent = ({ url, alt }) => {
+  const optimizedUrl = `https://wsrv.nl/?url=${url}&w=200&h=300&fit=cover&q=80`;
+  return <img loading="lazy" src={optimizedUrl} alt={alt} />;
+};
+```
+
+### **3. Search That Works**
+```typescript
+// Add to your search:
+- Fuzzy matching (for typos)
+- Search by year
+- Search by status
+- Filter while typing
+
+// Install fuse.js:
+npm install fuse.js
+```
+
+## 🎯 **UI Quick Wins**
+
+### **1. Keyboard Navigation**
+- `J/K` - navigate up/down
+- `Enter` - open details
+- `E` - edit
+- `Space` - quick progress
+- `/` - focus search
+- `?` - show shortcuts
+
+### **2. Better Status Indicators**
+```typescript
+// Visual progress bars on cards
+<div className="h-1 bg-surface-1 rounded-full overflow-hidden">
+  <div 
+    className="h-full bg-primary transition-all"
+    style={{ width: `${(current/total) * 100}%` }}
+  />
+</div>
+```
+
+### **3. Quick Actions Menu**
+```typescript
+// Right-click any item:
+- Mark next episode watched
+- Mark as completed
+- Move to...
+- Copy title
+- Find similar
+```
+
+## 🔌 **API Integrations (Easy Ones)**
+
+### **1. AniList (No API Key Needed)**
+```typescript
+const searchAniList = async (query: string) => {
+  const graphql = `
+    query ($search: String) {
+      Page {
+        media(search: $search, type: ANIME) {
+          id
+          title { romaji english }
+          coverImage { large }
+          episodes
+          description
+          genres
+        }
+      }
+    }
+  `;
+  
+  return fetch('https://graphql.anilist.co', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: graphql, variables: { search: query } })
+  });
+};
+```
+
+### **2. TMDB (Free API Key)**
+```typescript
+// Sign up at themoviedb.org/settings/api
+const TMDB_KEY = 'your-key';
+const searchMovies = (query: string) => 
+  fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${query}`);
+```
+
+## 📱 **Mobile Experience**
+
+```typescript
+// Bottom tab navigation for mobile
+// Swipe gestures:
+- Swipe right: mark watched
+- Swipe left: add to watchlist
+- Long press: quick edit
+
+// Bigger touch targets (min 44px)
+// Pull to refresh
+// Offline support with service workers
+```
+
+## 🚀 **Next Week's Roadmap**
+
+**Monday-Tuesday:**
+- Fix the broken routes
+- Implement edit functionality
+- Add real search with Fuse.js
+
+**Wednesday-Thursday:**
+- Simple leaderboard
+- Keyboard shortcuts
+- Better mobile experience
+
+**Friday-Weekend:**
+- AniList integration
+- Import/export functionality
+- Performance optimizations
+
+Keep it simple, ship fast, iterate based on what you actually use. The streaming aggregator idea is cool but that's a legal nightmare - focus on being the best tracker first.
+
+Want specific code for any of these? I can write the exact components you need.

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useKeyboardShortcuts, KeyboardShortcutsHelp } from "@/hooks/useKeyboardShortcuts";
 import Sidebar from "@/components/Sidebar";
 import HeaderBar from "@/components/HeaderBar";
 import StatsCards from "@/components/StatsCards";
@@ -11,6 +12,7 @@ import CatalogPreview from "@/components/CatalogPreview";
 import AchievementWidget from "@/components/AchievementWidget";
 import AddMediaModal from "@/components/AddMediaModal";
 import QuickUpdateSidebar from "@/components/QuickUpdateSidebar";
+import QuickProgressModal from "@/components/QuickProgressModal";
 import RandomPicker from "@/components/RandomPicker";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -22,7 +24,17 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isQuickUpdateOpen, setIsQuickUpdateOpen] = useState(false);
+  const [isQuickProgressOpen, setIsQuickProgressOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onAddMedia: () => setIsAddModalOpen(true),
+    onOpenLibrary: () => setIsCatalogOpen(true),
+    onQuickUpdate: () => setIsQuickProgressOpen(true),
+    onShowHelp: () => setShowShortcutsHelp(true)
+  });
 
   const { data: stats, isLoading: statsLoading } = useQuery<MediaStats>({
     queryKey: ['/api/stats'],
@@ -122,6 +134,16 @@ export default function Dashboard() {
       <MediaCatalog 
         isOpen={isCatalogOpen}
         onClose={() => setIsCatalogOpen(false)}
+      />
+
+      <QuickProgressModal
+        isOpen={isQuickProgressOpen}
+        onClose={() => setIsQuickProgressOpen(false)}
+      />
+
+      <KeyboardShortcutsHelp 
+        isOpen={showShortcutsHelp}
+        onClose={() => setShowShortcutsHelp(false)}
       />
     </div>
   );
