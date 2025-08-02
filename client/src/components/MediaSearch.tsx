@@ -1,59 +1,55 @@
-import { useState, useEffect } from "react";
-import { Search, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-interface MediaSearchResult {
-  id: string;
-  title: string;
-  imageUrl?: string;
-  description?: string;
-  releaseYear?: number;
-  genres?: string[];
-  externalId: string;
-}
+import { Badge } from "@/components/ui/badge";
+import { Search, ExternalLink } from "lucide-react";
 
 interface MediaSearchProps {
   isOpen: boolean;
   onClose: () => void;
   mediaType: string;
-  onSelect: (result: MediaSearchResult) => void;
+  onSelect: (result: any) => void;
+}
+
+interface SearchResult {
+  id: string;
+  title: string;
+  imageUrl: string;
+  description: string;
+  releaseYear: number;
+  genres: string[];
+  externalId: string;
 }
 
 export default function MediaSearch({ isOpen, onClose, mediaType, onSelect }: MediaSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<MediaSearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setSearchQuery("");
-      setSearchResults([]);
-      setHasSearched(false);
-    }
-  }, [isOpen]);
-
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-    
-    setIsSearching(true);
-    setHasSearched(true);
-    
-    try {
-      const response = await fetch(`/api/search-external?query=${encodeURIComponent(searchQuery)}&type=${mediaType}`);
-      if (response.ok) {
-        const results = await response.json();
-        setSearchResults(results);
-      } else {
-        setSearchResults([]);
+  const { data: searchResults = [], isLoading, refetch } = useQuery<SearchResult[]>({
+    queryKey: ['/api/search-external', searchQuery, mediaType],
+    queryFn: async () => {
+      if (!searchQuery.trim()) return [];
+      
+      const params = new URLSearchParams({
+        query: searchQuery,
+        type: mediaType
+      });
+      
+      const response = await fetch(`/api/search-external?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('Search failed');
       }
-    } catch (error) {
-      console.error("Search error:", error);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
+      return response.json();
+    },
+    enabled: false, // Manual trigger
+  });
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      setHasSearched(true);
+      refetch();
     }
   };
 
@@ -63,26 +59,30 @@ export default function MediaSearch({ isOpen, onClose, mediaType, onSelect }: Me
     }
   };
 
-  const getSearchPlaceholder = () => {
-    switch (mediaType) {
-      case 'Anime': return 'Search for anime titles...';
-      case 'Movies': return 'Search for movies...';
-      case 'TV Shows': return 'Search for TV shows...';
-      case 'Manhwa': return 'Search for manhwa titles...';
-      case 'Novels': return 'Search for light novels...';
-      default: return 'Search for media...';
-    }
+  const handleSelect = (result: SearchResult) => {
+    onSelect(result);
+    setSearchQuery("");
+    setHasSearched(false);
+  };
+
+  const handleClose = () => {
+    setSearchQuery("");
+    setHasSearched(false);
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-surface border-gray-700 max-w-2xl max-h-[80vh]">
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="bg-surface border-gray-700 max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            🔍 Search {mediaType}
+          <DialogTitle className="text-white">
+            Search {mediaType} Database
           </DialogTitle>
+          <p className="text-gray-400 text-sm">
+            Search external databases for {mediaType.toLowerCase()} information
+          </p>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Search Input */}
           <div className="flex space-x-2">
@@ -90,16 +90,16 @@ export default function MediaSearch({ isOpen, onClose, mediaType, onSelect }: Me
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={getSearchPlaceholder()}
+              placeholder={`Search for ${mediaType.toLowerCase()}...`}
               className="bg-surface-2 border-gray-600 flex-1"
             />
             <Button 
               onClick={handleSearch}
-              disabled={isSearching || !searchQuery.trim()}
+              disabled={!searchQuery.trim() || isLoading}
               className="bg-[#7A1927] hover:bg-[#9d2332]"
             >
-              {isSearching ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+              {isLoading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               ) : (
                 <Search className="w-4 h-4" />
               )}
@@ -107,82 +107,110 @@ export default function MediaSearch({ isOpen, onClose, mediaType, onSelect }: Me
           </div>
 
           {/* Search Results */}
-          <div className="max-h-96 overflow-y-auto">
-            {isSearching && (
-              <div className="text-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
-                <p className="text-gray-400">Searching for {mediaType.toLowerCase()}...</p>
+          {isLoading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                <p className="text-gray-400">Searching external databases...</p>
               </div>
-            )}
-            
-            {!isSearching && hasSearched && searchResults.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-400">No results found for "{searchQuery}"</p>
-                <p className="text-gray-500 text-sm mt-1">Try a different search term</p>
-              </div>
-            )}
-            
-            {!isSearching && searchResults.length > 0 && (
-              <div className="space-y-3">
-                {searchResults.map((result) => (
-                  <div
-                    key={result.id}
-                    className="bg-surface-2 rounded-lg p-4 border border-gray-600 hover:border-gray-500 cursor-pointer transition-colors"
-                    onClick={() => onSelect(result)}
-                  >
-                    <div className="flex space-x-3">
-                      {result.imageUrl && (
-                        <img
-                          src={result.imageUrl}
-                          alt={result.title}
-                          className="w-16 h-24 object-cover rounded bg-gray-700"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      )}
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg">{result.title}</h3>
+            </div>
+          )}
+
+          {hasSearched && !isLoading && searchResults.length === 0 && (
+            <div className="text-center py-8">
+              <div className="text-4xl mb-2">🔍</div>
+              <h3 className="text-lg font-semibold mb-1">No results found</h3>
+              <p className="text-gray-400">
+                Try searching with different keywords or check your spelling
+              </p>
+            </div>
+          )}
+
+          {searchResults.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                Search Results ({searchResults.length})
+              </h3>
+              
+              {searchResults.map((result) => (
+                <div
+                  key={result.id}
+                  className="bg-surface-2 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer"
+                  onClick={() => handleSelect(result)}
+                >
+                  <div className="flex gap-4">
+                    <img
+                      src={result.imageUrl}
+                      alt={result.title}
+                      className="w-16 h-24 object-cover rounded flex-shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://via.placeholder.com/300x450/333/fff?text=${encodeURIComponent(result.title)}`;
+                      }}
+                    />
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-white line-clamp-1">{result.title}</h4>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-gray-400 hover:text-white flex-shrink-0"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                        <span>{mediaType}</span>
                         {result.releaseYear && (
-                          <p className="text-gray-400 text-sm">({result.releaseYear})</p>
-                        )}
-                        {result.genres && result.genres.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {result.genres.slice(0, 3).map((genre) => (
-                              <span
-                                key={genre}
-                                className="bg-gray-700 px-2 py-1 rounded text-xs text-gray-300"
-                              >
-                                {genre}
-                              </span>
-                            ))}
-                            {result.genres.length > 3 && (
-                              <span className="text-gray-500 text-xs">+{result.genres.length - 3} more</span>
-                            )}
-                          </div>
-                        )}
-                        {result.description && (
-                          <p className="text-gray-400 text-sm mt-2 line-clamp-2">
-                            {result.description.length > 150 
-                              ? result.description.substring(0, 150) + "..."
-                              : result.description
-                            }
-                          </p>
+                          <>
+                            <span>•</span>
+                            <span>{result.releaseYear}</span>
+                          </>
                         )}
                       </div>
+
+                      {result.genres && result.genres.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {result.genres.slice(0, 3).map((genre) => (
+                            <Badge key={genre} variant="secondary" className="text-xs">
+                              {genre}
+                            </Badge>
+                          ))}
+                          {result.genres.length > 3 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{result.genres.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+
+                      <p className="text-gray-400 text-sm line-clamp-2">
+                        {result.description}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-600">
-            <Button variant="outline" onClick={onClose} className="bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </div>
+          {/* Search Tips */}
+          {!hasSearched && (
+            <div className="bg-surface-2 rounded-lg p-4 border border-gray-700">
+              <h4 className="font-semibold text-white mb-2">Search Tips</h4>
+              <ul className="text-gray-400 text-sm space-y-1">
+                <li>• Use the exact title or close variations</li>
+                <li>• Try searching without special characters</li>
+                <li>• For anime, you can search in English or Japanese</li>
+                <li>• Results come from {
+                  mediaType === 'Movies' || mediaType === 'TV Shows' ? 'TMDB' :
+                  mediaType === 'Anime' ? 'AniList' :
+                  'manga databases'
+                }</li>
+              </ul>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

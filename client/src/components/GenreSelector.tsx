@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Check, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Search, X } from "lucide-react";
 
 interface GenreSelectorProps {
   isOpen: boolean;
@@ -12,55 +14,102 @@ interface GenreSelectorProps {
 }
 
 const allGenres = [
-  'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 
-  'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'Slice of Life',
-  'Supernatural', 'Psychological', 'Sports', 'Historical', 'Mecha',
-  'School', 'Military', 'Music', 'Shounen', 'Seinen', 'Shoujo',
-  'Josei', 'Ecchi', 'Harem', 'Isekai', 'Martial Arts', 'Medical',
-  'Crime', 'Documentary', 'Biography', 'Animation', 'Family',
-  'War', 'Western', 'Musical', 'Film-Noir', 'Game Show', 'Talk Show',
-  'Reality TV', 'News', 'Sport', 'Adult', 'Mature'
+  'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller',
+  'Animation', 'Documentary', 'Family', 'Music', 'War', 'Western', 'Crime', 'History', 'Biography',
+  'Shounen', 'Shoujo', 'Seinen', 'Josei', 'Ecchi', 'Harem', 'Yaoi', 'Yuri', 'Mecha', 'Magical Girl',
+  'Isekai', 'School', 'Sports', 'Supernatural', 'Psychological', 'Slice of Life', 'Military',
+  'Post-Apocalyptic', 'Cyberpunk', 'Steampunk', 'Time Travel', 'Alternate History',
+  'Mature', 'Adult', 'Smut', 'Manhwa', 'Manhua', 'Pornhwa', 'Webtoon'
 ];
 
 export default function GenreSelector({ isOpen, onClose, selectedGenres, onGenresChange }: GenreSelectorProps) {
-  const [tempSelectedGenres, setTempSelectedGenres] = useState<string[]>(selectedGenres);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [tempSelected, setTempSelected] = useState<string[]>(selectedGenres);
+
+  const filteredGenres = allGenres.filter(genre =>
+    genre.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleGenreToggle = (genre: string) => {
-    setTempSelectedGenres(prev => 
+    setTempSelected(prev => 
       prev.includes(genre) 
         ? prev.filter(g => g !== genre)
         : [...prev, genre]
     );
   };
 
-  const handleConfirm = () => {
-    onGenresChange(tempSelectedGenres);
+  const handleSave = () => {
+    onGenresChange(tempSelected);
     onClose();
   };
 
   const handleCancel = () => {
-    setTempSelectedGenres(selectedGenres);
+    setTempSelected(selectedGenres);
+    setSearchQuery("");
     onClose();
+  };
+
+  const handleClearAll = () => {
+    setTempSelected([]);
+  };
+
+  const handleSelectPopular = () => {
+    const popularGenres = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Romance', 'Sci-Fi'];
+    setTempSelected(prev => {
+      const newSelected = [...prev];
+      popularGenres.forEach(genre => {
+        if (!newSelected.includes(genre)) {
+          newSelected.push(genre);
+        }
+      });
+      return newSelected;
+    });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
-      <DialogContent className="bg-surface border-gray-700 max-w-md max-h-[80vh]">
+      <DialogContent className="bg-surface border-gray-700 max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Select Genres</DialogTitle>
+          <DialogTitle className="text-white">Select Genres</DialogTitle>
+          <p className="text-gray-400 text-sm">
+            Choose one or more genres that describe your media
+          </p>
         </DialogHeader>
-        
-        <div className="space-y-4">
-          {/* Selected Genres Display */}
-          {tempSelectedGenres.length > 0 && (
-            <div className="border border-gray-600 rounded-lg p-3 bg-surface-2">
-              <p className="text-sm font-medium mb-2">Selected ({tempSelectedGenres.length}):</p>
-              <div className="flex flex-wrap gap-1">
-                {tempSelectedGenres.map((genre) => (
+
+        <div className="flex-1 overflow-hidden flex flex-col space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search genres..."
+              className="pl-10 bg-surface-2 border-gray-600"
+            />
+          </div>
+
+          {/* Selected Genres */}
+          {tempSelected.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-gray-300">
+                  Selected ({tempSelected.length})
+                </h4>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleClearAll}
+                  className="text-gray-400 hover:text-white"
+                >
+                  Clear All
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                {tempSelected.map((genre) => (
                   <Badge 
                     key={genre} 
                     variant="secondary" 
-                    className="bg-[#7A1927] text-white hover:bg-[#9d2332] cursor-pointer"
+                    className="bg-[#7A1927] text-white cursor-pointer"
                     onClick={() => handleGenreToggle(genre)}
                   >
                     {genre}
@@ -71,50 +120,69 @@ export default function GenreSelector({ isOpen, onClose, selectedGenres, onGenre
             </div>
           )}
 
-          {/* Genre Grid */}
-          <div className="max-h-64 overflow-y-auto">
-            <div className="grid grid-cols-2 gap-2">
-              {allGenres.map((genre) => {
-                const isSelected = tempSelectedGenres.includes(genre);
-                return (
-                  <button
-                    key={genre}
-                    onClick={() => handleGenreToggle(genre)}
-                    className={`
-                      flex items-center justify-between p-2 rounded-lg text-left text-sm transition-colors
-                      ${isSelected 
-                        ? 'bg-[#7A1927] text-white border-[#7A1927]' 
-                        : 'bg-surface-2 text-gray-300 hover:bg-gray-600 border-gray-600'
-                      }
-                      border
-                    `}
-                  >
-                    <span>{genre}</span>
-                    {isSelected && <Check className="w-4 h-4" />}
-                  </button>
-                );
-              })}
-            </div>
+          {/* Quick Actions */}
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleSelectPopular}
+              className="bg-surface-2 border-gray-600 text-gray-300 hover:text-white"
+            >
+              Select Popular
+            </Button>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-between space-x-3 pt-4 border-t border-gray-600">
-            <Button 
-              variant="outline" 
-              onClick={() => setTempSelectedGenres([])}
-              className="bg-gray-600 hover:bg-gray-700"
-            >
-              Clear All
-            </Button>
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={handleCancel} className="bg-gray-600 hover:bg-gray-700">
-                Cancel
-              </Button>
-              <Button onClick={handleConfirm} className="bg-[#7A1927] hover:bg-[#9d2332]">
-                Confirm ({tempSelectedGenres.length})
-              </Button>
+          {/* Genre Grid */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {filteredGenres.map((genre) => (
+                <div
+                  key={genre}
+                  className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                    tempSelected.includes(genre)
+                      ? 'bg-[#7A1927] bg-opacity-20 border border-[#7A1927]'
+                      : 'bg-surface-2 border border-gray-700 hover:border-gray-600'
+                  }`}
+                  onClick={() => handleGenreToggle(genre)}
+                >
+                  <Checkbox
+                    checked={tempSelected.includes(genre)}
+                    onChange={() => handleGenreToggle(genre)}
+                    className="data-[state=checked]:bg-[#7A1927] data-[state=checked]:border-[#7A1927]"
+                  />
+                  <span className={`text-sm ${
+                    tempSelected.includes(genre) ? 'text-white font-medium' : 'text-gray-300'
+                  }`}>
+                    {genre}
+                  </span>
+                </div>
+              ))}
             </div>
+            
+            {filteredGenres.length === 0 && (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-2">🔍</div>
+                <p className="text-gray-400">No genres found matching "{searchQuery}"</p>
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            className="bg-surface-2 border-gray-600 text-gray-300 hover:text-white"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            className="bg-[#7A1927] hover:bg-[#9d2332] text-white"
+          >
+            Save Genres ({tempSelected.length})
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
