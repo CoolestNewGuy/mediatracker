@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import Library from "@/pages/library";
+import Achievements from "@/pages/achievements";
+import SettingsPage from "@/pages/settings";
 import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
 
@@ -13,6 +15,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/library" component={Library} />
+      <Route path="/achievements" component={Achievements} />
+      <Route path="/settings" component={SettingsPage} />
       <Route path="/landing" component={Landing} />
       <Route component={NotFound} />
     </Switch>

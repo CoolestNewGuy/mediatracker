@@ -59,6 +59,18 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
             <Library size={16} />
             <span>Full Library</span>
           </Link>
+          <Link href="/achievements" className={`sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+            location === '/achievements' ? 'text-white bg-[#7A1927]' : 'text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-[#7A1927]'
+          }`}>
+            <Trophy size={16} />
+            <span>Achievements</span>
+          </Link>
+          <Link href="/settings" className={`sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+            location === '/settings' ? 'text-white bg-[#7A1927]' : 'text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-[#7A1927]'
+          }`}>
+            <Settings size={16} />
+            <span>Settings</span>
+          </Link>
         </div>
 
         {/* Media Categories */}
