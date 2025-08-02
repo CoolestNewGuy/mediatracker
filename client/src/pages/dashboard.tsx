@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { isUnauthorizedError } from "@/lib/authUtils";
 import Sidebar from "@/components/Sidebar";
 import HeaderBar from "@/components/HeaderBar";
 import StatsCards from "@/components/StatsCards";
@@ -9,30 +12,71 @@ import AchievementWidget from "@/components/AchievementWidget";
 import AddMediaModal from "@/components/AddMediaModal";
 import QuickUpdateSidebar from "@/components/QuickUpdateSidebar";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { LogOut, User } from "lucide-react";
 import type { MediaStats } from "@/lib/types";
 
 export default function Dashboard() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isQuickUpdateOpen, setIsQuickUpdateOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
-  const { data: stats, isLoading: statsLoading } = useQuery<MediaStats>({
+  // Redirect to home if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, isLoading, toast]);
+
+  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery<MediaStats>({
     queryKey: ['/api/stats'],
+    enabled: isAuthenticated,
   });
 
-  const { data: recentItems, isLoading: recentLoading } = useQuery({
+  const { data: recentItems, isLoading: recentLoading, error: recentError } = useQuery({
     queryKey: ['/api/recent'],
+    enabled: isAuthenticated,
   });
 
-  const { data: inProgressItems, isLoading: progressLoading } = useQuery({
+  const { data: inProgressItems, isLoading: progressLoading, error: progressError } = useQuery({
     queryKey: ['/api/media/in-progress'],
+    enabled: isAuthenticated,
   });
 
-  const { data: achievements, isLoading: achievementsLoading } = useQuery({
+  const { data: achievements, isLoading: achievementsLoading, error: achievementsError } = useQuery({
     queryKey: ['/api/achievements'],
+    enabled: isAuthenticated,
   });
 
-  if (statsLoading) {
+  // Handle authentication errors
+  useEffect(() => {
+    const errors = [statsError, recentError, progressError, achievementsError].filter(Boolean);
+    for (const error of errors) {
+      if (error && isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+    }
+  }, [statsError, recentError, progressError, achievementsError, toast]);
+
+  if (isLoading || statsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -41,6 +85,10 @@ export default function Dashboard() {
         </div>
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect in useEffect
   }
 
   return (
