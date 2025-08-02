@@ -46,6 +46,9 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isGenreModalOpen, setIsGenreModalOpen] = useState(false);
+  const [showProgressFields, setShowProgressFields] = useState(false);
+  const [autoSearchResults, setAutoSearchResults] = useState<any[]>([]);
+  const [showAutoSearch, setShowAutoSearch] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -91,7 +94,41 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
       releaseYear: undefined,
     });
     setSelectedGenres([]);
+    setShowProgressFields(false);
+    setAutoSearchResults([]);
+    setShowAutoSearch(false);
   };
+
+  // Auto search when title is 3+ characters
+  useEffect(() => {
+    const performAutoSearch = async () => {
+      if (formData.title && formData.title.length >= 3 && formData.type) {
+        try {
+          const response = await fetch(`/api/external-search?query=${encodeURIComponent(formData.title)}&type=${encodeURIComponent(formData.type)}`);
+          const results = await response.json();
+          setAutoSearchResults(results.slice(0, 5)); // Show max 5 results
+          setShowAutoSearch(results.length > 0);
+        } catch (error) {
+          console.error('Auto search error:', error);
+          setShowAutoSearch(false);
+        }
+      } else {
+        setShowAutoSearch(false);
+      }
+    };
+
+    const timeoutId = setTimeout(performAutoSearch, 300); // Debounce
+    return () => clearTimeout(timeoutId);
+  }, [formData.title, formData.type]);
+
+  // Show progress fields when status is selected and it's "In Progress"
+  useEffect(() => {
+    if (formData.status === 'In Progress') {
+      setShowProgressFields(true);
+    } else {
+      setShowProgressFields(false);
+    }
+  }, [formData.status]);
 
   const handleSearchResult = (result: any) => {
     setFormData(prev => ({
@@ -191,7 +228,6 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
     addMediaMutation.mutate(submitData);
   };
 
-  const showProgressFields = formData.type && formData.type !== 'Movies';
   const showSeasonField = formData.type === 'Anime' || formData.type === 'TV Shows';
   const episodeLabel = ['Manhwa', 'Pornhwa', 'Novels'].includes(formData.type || '') ? 'Chapter' : 'Episode';
 
@@ -245,21 +281,43 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
                 Click the search button to find {formData.type.toLowerCase()} from external databases
               </p>
             )}
+            
+            {/* Auto Search Results */}
+            {showAutoSearch && (
+              <div className="bg-surface-2 border border-gray-600 rounded-md mt-2 max-h-40 overflow-y-auto">
+                <div className="p-2 text-xs text-gray-400 border-b border-gray-600">
+                  Auto-search results (click to fill):
+                </div>
+                {autoSearchResults.map((result, index) => (
+                  <div
+                    key={index}
+                    className="p-2 hover:bg-surface-1 cursor-pointer border-b border-gray-700 last:border-b-0"
+                    onClick={() => handleSearchResult(result)}
+                  >
+                    <div className="text-sm font-medium">{result.title}</div>
+                    {result.releaseYear && (
+                      <div className="text-xs text-gray-400">{result.releaseYear}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Status */}
-          <div>
-            <Label htmlFor="status">Status*</Label>
-            <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
-              <SelectTrigger className="bg-surface-2 border-gray-600">
-                <SelectValue placeholder="Select Status" />
-              </SelectTrigger>
-              <SelectContent className="bg-surface-2 border-gray-600">
-                {getStatusOptions(formData.type || '').map(status => (
-                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Status - only show if type is selected */}
+          {formData.type && (
+            <div>
+              <Label htmlFor="status">Status*</Label>
+              <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
+                <SelectTrigger className="bg-surface-2 border-gray-600">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent className="bg-surface-2 border-gray-600">
+                  {getStatusOptions(formData.type || '').map(status => (
+                    <SelectItem key={status} value={status}>{status}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             
             {/* Quick Status Buttons */}
             {formData.type && (
@@ -294,9 +352,10 @@ export default function AddMediaModal({ isOpen, onClose }: AddMediaModalProps) {
               </div>
             )}
           </div>
+          )}
 
-          {/* Progress Fields */}
-          {showProgressFields && (
+          {/* Progress Fields - only show if status is selected and status is "In Progress" */}
+          {formData.status === 'In Progress' && (
             <div className="space-y-4">
               {showSeasonField && (
                 <div>
