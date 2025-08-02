@@ -1,0 +1,949 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Tracker - Complete Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7A1927',
+                        accent: '#ff6b6b',
+                        surface: '#1a1a1a',
+                        'surface-2': '#2a2a2a',
+                        'surface-3': '#3a3a3a'
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body { 
+            background: #0a0a0a; 
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .gradient-border {
+            background: linear-gradient(90deg, #7A1927, #ff6b6b);
+            border-radius: 12px;
+            padding: 1px;
+        }
+        .gradient-border > div {
+            background: #1a1a1a;
+            border-radius: 11px;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #7A1927, #ff6b6b);
+        }
+        .hover-scale {
+            transition: transform 0.2s ease;
+        }
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+        .sidebar-item:hover {
+            background: #2a2a2a;
+            border-left: 4px solid #7A1927;
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- @COMPONENT: MainLayout [full application layout] -->
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <!-- @COMPONENT: Sidebar [navigation and quick actions] -->
+        <div class="w-64 bg-surface border-r border-gray-700 flex-shrink-0">
+            <!-- Logo/Header -->
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-film text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Media Tracker</h1>
+                        <p class="text-xs text-gray-400">Your Entertainment Hub</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="p-4">
+                <div class="space-y-2">
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-white bg-primary">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Media</span>
+                    </a>
+                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                        <i class="fas fa-search"></i>
+                        <span>Search All</span>
+                    </a>
+                </div>
+
+                <!-- Media Types -->
+                <div class="mt-6">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Media Types</h3>
+                    <div class="space-y-1">
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-tv"></i>
+                            <span>Anime</span>
+                            <span class="ml-auto bg-surface-2 px-2 py-1 rounded text-xs" data-bind="stats.anime.total">24</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-book"></i>
+                            <span>Manhwa</span>
+                            <span class="ml-auto bg-surface-2 px-2 py-1 rounded text-xs" data-bind="stats.manhwa.total">18</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-heart"></i>
+                            <span>Pornhwa</span>
+                            <span class="ml-auto bg-surface-2 px-2 py-1 rounded text-xs" data-bind="stats.pornhwa.total">7</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-book-open"></i>
+                            <span>Novels</span>
+                            <span class="ml-auto bg-surface-2 px-2 py-1 rounded text-xs" data-bind="stats.novels.total">12</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-film"></i>
+                            <span>Movies</span>
+                            <span class="ml-auto bg-surface-2 px-2 py-1 rounded text-xs" data-bind="stats.movies.total">45</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-tv"></i>
+                            <span>TV Shows</span>
+                            <span class="ml-auto bg-surface-2 px-2 py-1 rounded text-xs" data-bind="stats.tvshows.total">15</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mt-6">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Quick Actions</h3>
+                    <div class="space-y-1">
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-random"></i>
+                            <span>Random Picker</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-clock"></i>
+                            <span>Time Tracker</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-trophy"></i>
+                            <span>Achievements</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="mt-6">
+                    <div class="space-y-1">
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300">
+                            <i class="fas fa-download"></i>
+                            <span>Export Data</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Header Bar -->
+            <!-- @COMPONENT: HeaderBar [search, user actions, notifications] -->
+            <header class="bg-surface border-b border-gray-700 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <h2 class="text-2xl font-bold">Dashboard</h2>
+                        <div class="flex items-center space-x-2 bg-surface-2 rounded-lg px-3 py-1">
+                            <i class="fas fa-fire text-accent"></i>
+                            <span class="text-sm font-medium" data-bind="user.streak">7 day streak!</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Search Bar -->
+                        <div class="relative">
+                            <input type="text" placeholder="Search media..." 
+                                   class="bg-surface-2 border border-gray-600 rounded-lg px-4 py-2 pr-10 w-80 focus:outline-none focus:border-primary">
+                            <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                        </div>
+                        
+                        <!-- Quick Add Button -->
+                        <button onclick="openAddMediaModal()" 
+                                class="bg-primary hover:bg-red-800 px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                                data-event="click:openAddMediaModal">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Media</span>
+                        </button>
+                        
+                        <!-- User Menu -->
+                        <div class="relative">
+                            <button class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- @END_COMPONENT: HeaderBar -->
+
+            <!-- Main Dashboard Content -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                <!-- Stats Overview Cards -->
+                <!-- @COMPONENT: StatsCards [overview statistics] -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-surface rounded-xl p-6 border border-gray-700 hover-scale">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Total Items</p>
+                                <p class="text-3xl font-bold" data-bind="stats.total">121</p>
+                                <p class="text-green-400 text-sm mt-1">+5 this week</p>
+                            </div>
+                            <div class="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-list text-primary text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-surface rounded-xl p-6 border border-gray-700 hover-scale">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Completed</p>
+                                <p class="text-3xl font-bold" data-bind="stats.completed">87</p>
+                                <p class="text-green-400 text-sm mt-1">72% completion rate</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check text-green-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-surface rounded-xl p-6 border border-gray-700 hover-scale">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">In Progress</p>
+                                <p class="text-3xl font-bold" data-bind="stats.inProgress">18</p>
+                                <p class="text-amber-400 text-sm mt-1">Active watching</p>
+                            </div>
+                            <div class="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-play text-amber-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-surface rounded-xl p-6 border border-gray-700 hover-scale">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Time Spent</p>
+                                <p class="text-3xl font-bold" data-bind="stats.timeSpent">342h</p>
+                                <p class="text-blue-400 text-sm mt-1">This month: 28h</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-blue-400 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: StatsCards -->
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column - Charts and Analytics -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Progress Chart -->
+                        <!-- @COMPONENT: ProgressChart [visual progress analytics] -->
+                        <div class="bg-surface rounded-xl p-6 border border-gray-700">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-xl font-bold">Weekly Progress</h3>
+                                <select class="bg-surface-2 border border-gray-600 rounded-lg px-3 py-1 text-sm">
+                                    <option>Last 7 days</option>
+                                    <option>Last 30 days</option>
+                                    <option>Last 3 months</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Placeholder for Chart -->
+                            <div class="h-64 bg-surface-2 rounded-lg flex items-center justify-center">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-line text-4xl text-gray-500 mb-4"></i>
+                                    <p class="text-gray-400">Progress Chart</p>
+                                    <p class="text-sm text-gray-500">Shows weekly completion trends</p>
+                                </div>
+                            </div>
+                            <!-- @FUNCTIONALITY: This chart should display progress over time using Chart.js or similar -->
+                        </div>
+                        <!-- @END_COMPONENT: ProgressChart -->
+
+                        <!-- Recently Added -->
+                        <!-- @COMPONENT: RecentMediaList [latest additions] -->
+                        <div class="bg-surface rounded-xl p-6 border border-gray-700">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-xl font-bold">Recently Added</h3>
+                                <a href="#" class="text-primary hover:text-accent text-sm">View All</a>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <!-- @MAP: recentItems.map(item => ( -->
+                                <div class="flex items-center space-x-4 p-3 bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors">
+                                    <!-- Cover placeholder -->
+                                    <div class="w-12 h-16 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-image text-white"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium" data-bind="item.title">Attack on Titan: Final Season</h4>
+                                        <p class="text-sm text-gray-400" data-bind="item.type">Anime</p>
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <span class="px-2 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs" data-bind="item.status">To Watch</span>
+                                            <span class="text-xs text-gray-500" data-bind="item.dateAdded">2 days ago</span>
+                                        </div>
+                                    </div>
+                                    <button class="text-gray-400 hover:text-white">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                                <!-- @END_MAP )) -->
+                                
+                                <div class="flex items-center space-x-4 p-3 bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors">
+                                    <div class="w-12 h-16 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-book text-white"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium">Solo Leveling</h4>
+                                        <p class="text-sm text-gray-400">Manhwa</p>
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">In Progress</span>
+                                            <span class="text-xs text-gray-500">3 days ago</span>
+                                        </div>
+                                    </div>
+                                    <button class="text-gray-400 hover:text-white">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4 p-3 bg-surface-2 rounded-lg hover:bg-surface-3 transition-colors">
+                                    <div class="w-12 h-16 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-film text-white"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium">Dune: Part Two</h4>
+                                        <p class="text-sm text-gray-400">Movie</p>
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">Watched</span>
+                                            <span class="text-xs text-gray-500">1 week ago</span>
+                                        </div>
+                                    </div>
+                                    <button class="text-gray-400 hover:text-white">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: RecentMediaList -->
+                    </div>
+
+                    <!-- Right Column - Quick Actions and Status -->
+                    <div class="space-y-6">
+                        <!-- Currently Watching/Reading -->
+                        <!-- @COMPONENT: CurrentlyActive [in-progress items] -->
+                        <div class="bg-surface rounded-xl p-6 border border-gray-700">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-bold">Currently Active</h3>
+                                <button class="text-primary hover:text-accent text-sm" data-event="click:quickUpdate">
+                                    <i class="fas fa-plus"></i> Quick Update
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <!-- @MAP: activeItems.map(item => ( -->
+                                <div class="border border-gray-600 rounded-lg p-4">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div>
+                                            <h4 class="font-medium text-sm" data-bind="item.title">Jujutsu Kaisen</h4>
+                                            <p class="text-xs text-gray-400" data-bind="item.type">Anime</p>
+                                        </div>
+                                        <span class="text-xs text-green-400" data-bind="item.progress">S2E18</span>
+                                    </div>
+                                    
+                                    <!-- Progress Bar -->
+                                    <div class="mb-3">
+                                        <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                            <span>Progress</span>
+                                            <span data-bind="item.progressPercent">75%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-700 rounded-full h-2">
+                                            <div class="progress-bar h-2 rounded-full" style="width: 75%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex space-x-2">
+                                        <button class="flex-1 bg-primary hover:bg-red-800 py-2 px-3 rounded text-xs transition-colors"
+                                                data-event="click:incrementProgress" data-implementation="Should update progress by +1">
+                                            <i class="fas fa-plus mr-1"></i> +1 Episode
+                                        </button>
+                                        <button class="bg-surface-2 hover:bg-surface-3 py-2 px-3 rounded text-xs transition-colors">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- @END_MAP )) -->
+                                
+                                <div class="border border-gray-600 rounded-lg p-4">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div>
+                                            <h4 class="font-medium text-sm">Tower of God</h4>
+                                            <p class="text-xs text-gray-400">Manhwa</p>
+                                        </div>
+                                        <span class="text-xs text-green-400">Ch 543</span>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                            <span>Progress</span>
+                                            <span>92%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-700 rounded-full h-2">
+                                            <div class="progress-bar h-2 rounded-full" style="width: 92%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex space-x-2">
+                                        <button class="flex-1 bg-primary hover:bg-red-800 py-2 px-3 rounded text-xs transition-colors">
+                                            <i class="fas fa-plus mr-1"></i> +1 Chapter
+                                        </button>
+                                        <button class="bg-surface-2 hover:bg-surface-3 py-2 px-3 rounded text-xs transition-colors">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: CurrentlyActive -->
+
+                        <!-- Random Picker Widget -->
+                        <!-- @COMPONENT: RandomPicker [what to watch next] -->
+                        <div class="bg-surface rounded-xl p-6 border border-gray-700">
+                            <h3 class="text-lg font-bold mb-4">🎲 What to Watch Next?</h3>
+                            
+                            <div class="space-y-3 mb-4">
+                                <select class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 text-sm">
+                                    <option>All Types</option>
+                                    <option>Anime Only</option>
+                                    <option>Manhwa Only</option>
+                                    <option>Movies Only</option>
+                                </select>
+                                
+                                <select class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 text-sm">
+                                    <option>Not Started</option>
+                                    <option>In Progress</option>
+                                    <option>All</option>
+                                </select>
+                            </div>
+                            
+                            <button class="w-full bg-primary hover:bg-red-800 py-3 rounded-lg font-medium transition-colors"
+                                    data-event="click:pickRandom" data-implementation="Should randomly select media based on filters">
+                                <i class="fas fa-random mr-2"></i> Pick Something Random!
+                            </button>
+                            
+                            <!-- Random Result Display -->
+                            <!-- @STATE: randomResult:object|null = null -->
+                            <div class="mt-4 p-4 bg-surface-2 rounded-lg text-center" style="display: none;" id="randomResult">
+                                <div class="text-sm text-gray-400 mb-1" data-bind="randomResult.type">Anime</div>
+                                <div class="font-medium" data-bind="randomResult.title">Your Random Pick</div>
+                                <div class="text-xs text-gray-500 mt-1" data-bind="randomResult.genre">Action, Supernatural</div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: RandomPicker -->
+
+                        <!-- Recent Achievements -->
+                        <!-- @COMPONENT: AchievementWidget [recent unlocks] -->
+                        <div class="bg-surface rounded-xl p-6 border border-gray-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold">🏆 Achievements</h3>
+                                <a href="#" class="text-primary hover:text-accent text-sm">View All</a>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center space-x-3 p-3 bg-surface-2 rounded-lg">
+                                    <div class="w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-trophy text-yellow-400 text-sm"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium">Collector</p>
+                                        <p class="text-xs text-gray-400">Added 100 items</p>
+                                    </div>
+                                    <span class="text-xs text-gray-500">2 days ago</span>
+                                </div>
+                                
+                                <div class="flex items-center space-x-3 p-3 bg-surface-2 rounded-lg">
+                                    <div class="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-fire text-blue-400 text-sm"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium">Week Streak</p>
+                                        <p class="text-xs text-gray-400">7 day activity streak</p>
+                                    </div>
+                                    <span class="text-xs text-gray-500">1 week ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: AchievementWidget -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: MainLayout -->
+
+    <!-- Add Media Modal -->
+    <!-- @COMPONENT: AddMediaModal [comprehensive media addition form] -->
+    <div id="addMediaModal" class="fixed inset-0 bg-black bg-opacity-75 modal-backdrop hidden flex items-center justify-center z-50">
+        <div class="bg-surface rounded-xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold">➕ Add New Media</h3>
+                <button onclick="closeAddMediaModal()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="addMediaForm" class="space-y-4">
+                <!-- Media Type Selection -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Media Type*</label>
+                    <select name="type" id="mediaType" required 
+                            class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-primary"
+                            onchange="updateFormFields()">
+                        <option value="">Select Type</option>
+                        <option value="Anime">Anime</option>
+                        <option value="Manhwa">Manhwa</option>
+                        <option value="Pornhwa">Pornhwa</option>
+                        <option value="Novels">Novels</option>
+                        <option value="Movies">Movies</option>
+                        <option value="TV Shows">TV Shows</option>
+                    </select>
+                </div>
+                
+                <!-- Title Input -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Title*</label>
+                    <input type="text" name="title" required 
+                           class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-primary"
+                           placeholder="Enter media title">
+                </div>
+                
+                <!-- Status Selection -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Status*</label>
+                    <select name="status" id="mediaStatus" required 
+                            class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-primary">
+                        <option value="">Select Status</option>
+                    </select>
+                    
+                    <!-- Quick Status Buttons -->
+                    <div class="flex space-x-2 mt-2">
+                        <button type="button" onclick="setQuickStatus('planned')" 
+                                class="flex-1 bg-amber-500/20 text-amber-400 py-1 px-3 rounded text-xs hover:bg-amber-500/30 transition-colors">
+                            Plan to Watch/Read
+                        </button>
+                        <button type="button" onclick="setQuickStatus('progress')" 
+                                class="flex-1 bg-green-500/20 text-green-400 py-1 px-3 rounded text-xs hover:bg-green-500/30 transition-colors">
+                            In Progress
+                        </button>
+                        <button type="button" onclick="setQuickStatus('completed')" 
+                                class="flex-1 bg-blue-500/20 text-blue-400 py-1 px-3 rounded text-xs hover:bg-blue-500/30 transition-colors">
+                            Completed
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Progress Fields (Dynamic based on type) -->
+                <div id="progressFields" class="space-y-4 hidden">
+                    <div id="seasonField" class="hidden">
+                        <label class="block text-sm font-medium mb-2">Season</label>
+                        <input type="number" name="season" min="1" value="1"
+                               class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-primary">
+                    </div>
+                    
+                    <div id="episodeField" class="hidden">
+                        <label class="block text-sm font-medium mb-2" id="episodeLabel">Episode</label>
+                        <input type="number" name="episode" min="0" value="0"
+                               class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-primary">
+                    </div>
+                    
+                    <div id="progressText">
+                        <label class="block text-sm font-medium mb-2">Progress Notes</label>
+                        <input type="text" name="progressNotes" 
+                               class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-primary"
+                               placeholder="e.g., S1E12 or Ch25">
+                    </div>
+                </div>
+                
+                <!-- Genre Selection -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Genre</label>
+                    <select name="genre" 
+                            class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-primary">
+                        <option value="">Select Genre</option>
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Slice of Life">Slice of Life</option>
+                        <option value="Action">Action</option>
+                        <option value="Adventure">Adventure</option>
+                        <option value="Comedy">Comedy</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Horror">Horror</option>
+                        <option value="Mystery">Mystery</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Psychological">Psychological</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Supernatural">Supernatural</option>
+                        <option value="Historical">Historical</option>
+                    </select>
+                </div>
+                
+                <!-- Notes -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Notes (Optional)</label>
+                    <textarea name="notes" rows="3" 
+                              class="w-full bg-surface-2 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-primary"
+                              placeholder="Any additional notes..."></textarea>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" onclick="closeAddMediaModal()" 
+                            class="flex-1 bg-gray-600 hover:bg-gray-700 py-3 rounded-lg font-medium transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 bg-primary hover:bg-red-800 py-3 rounded-lg font-medium transition-colors"
+                            data-implementation="Should validate form and add media to appropriate sheet">
+                        Add Media
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: AddMediaModal -->
+
+    <!-- Quick Update Sidebar -->
+    <!-- @COMPONENT: QuickUpdateSidebar [rapid progress updates] -->
+    <div id="quickUpdateSidebar" class="fixed right-0 top-0 h-full w-80 bg-surface border-l border-gray-700 transform translate-x-full transition-transform duration-300 z-40">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold">⚡ Quick Update</h3>
+                <button onclick="closeQuickUpdate()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <p class="text-sm text-gray-400">Update progress for items you're currently watching/reading:</p>
+                
+                <!-- @MAP: inProgressItems.map(item => ( -->
+                <div class="bg-surface-2 rounded-lg p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h4 class="font-medium" data-bind="item.title">One Piece</h4>
+                            <p class="text-sm text-gray-400" data-bind="item.type">Anime</p>
+                            <p class="text-xs text-gray-500" data-bind="item.currentProgress">Current: S1E1045</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-primary hover:bg-red-800 py-2 px-3 rounded text-sm transition-colors"
+                                data-event="click:incrementEpisode" data-implementation="Should increment episode count by 1">
+                            +1 Episode
+                        </button>
+                        <button class="bg-surface-3 hover:bg-gray-600 py-2 px-3 rounded text-sm transition-colors">
+                            Edit
+                        </button>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+                
+                <div class="bg-surface-2 rounded-lg p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h4 class="font-medium">Chainsaw Man</h4>
+                            <p class="text-sm text-gray-400">Manhwa</p>
+                            <p class="text-xs text-gray-500">Current: Ch 144</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-primary hover:bg-red-800 py-2 px-3 rounded text-sm transition-colors">
+                            +1 Chapter
+                        </button>
+                        <button class="bg-surface-3 hover:bg-gray-600 py-2 px-3 rounded text-sm transition-colors">
+                            Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: QuickUpdateSidebar -->
+
+    <!-- Toast Notifications Container -->
+    <!-- @COMPONENT: ToastContainer [user feedback notifications] -->
+    <div id="toastContainer" class="fixed top-4 right-4 space-y-2 z-50">
+        <!-- Toast notifications will be dynamically inserted here -->
+        <!-- Example toast structure:
+        <div class="bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-check"></i>
+                <span>Media added successfully!</span>
+            </div>
+        </div>
+        -->
+    </div>
+    <!-- @END_COMPONENT: ToastContainer -->
+
+    <script>
+        // ===== UI INTERACTION FUNCTIONS =====
+        
+        (function() {
+            // Open Add Media Modal
+            window.openAddMediaModal = function() {
+                document.getElementById('addMediaModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            };
+            
+            // Close Add Media Modal
+            window.closeAddMediaModal = function() {
+                document.getElementById('addMediaModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                document.getElementById('addMediaForm').reset();
+                hideProgressFields();
+            };
+            
+            // Update form fields based on media type
+            window.updateFormFields = function() {
+                const mediaType = document.getElementById('mediaType').value;
+                const statusSelect = document.getElementById('mediaStatus');
+                const progressFields = document.getElementById('progressFields');
+                const seasonField = document.getElementById('seasonField');
+                const episodeField = document.getElementById('episodeField');
+                const episodeLabel = document.getElementById('episodeLabel');
+                
+                // Clear status options
+                statusSelect.innerHTML = '<option value="">Select Status</option>';
+                
+                // Hide all progress fields initially
+                hideProgressFields();
+                
+                if (mediaType === 'Movies') {
+                    statusSelect.innerHTML += '<option value="To Watch">To Watch</option>';
+                    statusSelect.innerHTML += '<option value="Watched">Watched</option>';
+                    statusSelect.innerHTML += '<option value="Dropped">Dropped</option>';
+                } else if (mediaType === 'Anime' || mediaType === 'TV Shows') {
+                    statusSelect.innerHTML += '<option value="To Watch">To Watch</option>';
+                    statusSelect.innerHTML += '<option value="In Progress">In Progress</option>';
+                    statusSelect.innerHTML += '<option value="Watched">Watched</option>';
+                    statusSelect.innerHTML += '<option value="Dropped">Dropped</option>';
+                    
+                    progressFields.classList.remove('hidden');
+                    seasonField.classList.remove('hidden');
+                    episodeField.classList.remove('hidden');
+                    episodeLabel.textContent = 'Episode';
+                } else if (mediaType === 'Manhwa' || mediaType === 'Pornhwa' || mediaType === 'Novels') {
+                    statusSelect.innerHTML += '<option value="To Read">To Read</option>';
+                    statusSelect.innerHTML += '<option value="In Progress">In Progress</option>';
+                    statusSelect.innerHTML += '<option value="Read">Read</option>';
+                    statusSelect.innerHTML += '<option value="Dropped">Dropped</option>';
+                    
+                    progressFields.classList.remove('hidden');
+                    episodeField.classList.remove('hidden');
+                    episodeLabel.textContent = 'Chapter';
+                }
+            };
+            
+            // Hide progress fields
+            function hideProgressFields() {
+                document.getElementById('progressFields').classList.add('hidden');
+                document.getElementById('seasonField').classList.add('hidden');
+                document.getElementById('episodeField').classList.add('hidden');
+            }
+            
+            // Set quick status
+            window.setQuickStatus = function(statusType) {
+                const mediaType = document.getElementById('mediaType').value;
+                const statusSelect = document.getElementById('mediaStatus');
+                
+                if (!mediaType) {
+                    showToast('Please select a media type first', 'warning');
+                    return;
+                }
+                
+                if (statusType === 'planned') {
+                    if (mediaType === 'Movies') {
+                        statusSelect.value = 'To Watch';
+                    } else if (mediaType === 'Anime' || mediaType === 'TV Shows') {
+                        statusSelect.value = 'To Watch';
+                    } else {
+                        statusSelect.value = 'To Read';
+                    }
+                } else if (statusType === 'progress') {
+                    statusSelect.value = 'In Progress';
+                } else if (statusType === 'completed') {
+                    if (mediaType === 'Movies') {
+                        statusSelect.value = 'Watched';
+                    } else if (mediaType === 'Anime' || mediaType === 'TV Shows') {
+                        statusSelect.value = 'Watched';
+                    } else {
+                        statusSelect.value = 'Read';
+                    }
+                }
+            };
+            
+            // Show Quick Update Sidebar
+            window.showQuickUpdate = function() {
+                document.getElementById('quickUpdateSidebar').classList.remove('translate-x-full');
+            };
+            
+            // Close Quick Update Sidebar
+            window.closeQuickUpdate = function() {
+                document.getElementById('quickUpdateSidebar').classList.add('translate-x-full');
+            };
+            
+            // Show Toast Notification
+            window.showToast = function(message, type = 'success') {
+                const toastContainer = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                
+                let bgColor = 'bg-green-500';
+                let icon = 'fas fa-check';
+                
+                if (type === 'error') {
+                    bgColor = 'bg-red-500';
+                    icon = 'fas fa-exclamation-triangle';
+                } else if (type === 'warning') {
+                    bgColor = 'bg-amber-500';
+                    icon = 'fas fa-exclamation-circle';
+                } else if (type === 'info') {
+                    bgColor = 'bg-blue-500';
+                    icon = 'fas fa-info-circle';
+                }
+                
+                toast.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300`;
+                toast.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <i class="${icon}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Animate in
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-full');
+                }, 100);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    toast.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        toastContainer.removeChild(toast);
+                    }, 300);
+                }, 3000);
+            };
+            
+            // Form submission handler
+            document.getElementById('addMediaForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const mediaData = Object.fromEntries(formData.entries());
+                
+                // TODO: Implement actual media addition logic
+                // This would interface with Google Sheets Apps Script
+                console.log('Adding media:', mediaData);
+                
+                // Simulate success
+                showToast('Media added successfully!');
+                closeAddMediaModal();
+                
+                // TODO: Refresh dashboard data
+            });
+            
+            // Close modal when clicking outside
+            document.getElementById('addMediaModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAddMediaModal();
+                }
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + N = Add new media
+                if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                    e.preventDefault();
+                    openAddMediaModal();
+                }
+                
+                // Escape = Close modals
+                if (e.key === 'Escape') {
+                    closeAddMediaModal();
+                    closeQuickUpdate();
+                }
+                
+                // Ctrl/Cmd + U = Quick update
+                if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
+                    e.preventDefault();
+                    showQuickUpdate();
+                }
+            });
+            
+            // Initialize tooltips and demo interactions
+            document.addEventListener('DOMContentLoaded', function() {
+                // Show welcome message
+                setTimeout(() => {
+                    showToast('Welcome to Media Tracker! Press Ctrl+N to add new media.', 'info');
+                }, 1000);
+                
+                // Demo functionality for interactive elements
+                document.querySelectorAll('[data-event]').forEach(element => {
+                    const eventData = element.getAttribute('data-event');
+                    const [eventType, handlerName] = eventData.split(':');
+                    
+                    if (eventType === 'click') {
+                        element.addEventListener('click', function() {
+                            // TODO: Implement actual handlers
+                            if (handlerName === 'quickUpdate') {
+                                showQuickUpdate();
+                            } else if (handlerName === 'pickRandom') {
+                                // Demo random pick
+                                const randomResult = document.getElementById('randomResult');
+                                randomResult.style.display = 'block';
+                                showToast('Random pick selected!');
+                            } else if (handlerName === 'incrementProgress') {
+                                showToast('Progress updated!');
+                            }
+                        });
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
