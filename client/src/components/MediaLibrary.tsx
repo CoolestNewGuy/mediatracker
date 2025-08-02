@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { MediaItem } from "@shared/schema";
-import EditMediaModal from "@/components/EditMediaModal";
+// Import EditMediaModal when it's needed
 
 interface MediaLibraryProps {
   onAddMedia: () => void;

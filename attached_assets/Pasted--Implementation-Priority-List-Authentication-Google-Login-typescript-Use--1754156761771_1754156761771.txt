@@ -1,0 +1,170 @@
+## 🛠️ Implementation Priority List
+
+### **Authentication - Google Login**
+```typescript
+// Use NextAuth.js for Replit
+npm install next-auth
+
+// app/api/auth/[...nextauth]/route.ts
+import GoogleProvider from "next-auth/providers/google";
+
+export const authOptions = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    })
+  ],
+  callbacks: {
+    async session({ session, token }) {
+      // Add user ID to session
+      return session;
+    }
+  }
+};
+```
+
+### **Background Improvements**
+```typescript
+// Animated gradient background
+.animated-bg {
+  background: linear-gradient(-45deg, #0a0a0a, #1a0f1a, #0f0a1a, #1a0a0f);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+// Particle.js for subtle floating elements
+// CSS mesh gradient for depth
+// Parallax stars that move with scroll
+```
+
+### **Revenue Models (Legal)**
+1. **Freemium Features**
+   - Free: 3 lists, 100 items
+   - Pro: Unlimited, advanced stats, API access
+   - Team: Shared lists, competitions
+
+2. **Affiliate Links**
+   - Crunchyroll/Funimation partnerships
+   - Amazon affiliate for manga/DVDs
+   - "Watch on [Platform]" buttons
+
+3. **Data Analytics (Anonymized)**
+   - Trend reports for studios
+   - Genre popularity data
+   - Regional preferences
+
+### **Replit Bot Instructions**
+```
+"You're building a media tracker. Focus on:
+1. Real API integration (TMDB, AniList)
+2. Implement missing handleSearchResult function
+3. Add edit modal using existing PATCH endpoint
+4. Create leaderboard component with filters
+5. Add CSV import/export functionality
+6. Implement keyboard shortcuts (/, j/k navigation)
+7. Add pagination to media queries
+8. Create 'Continue Watching' smart section
+9. Add service worker for offline support
+10. Implement lazy loading for images"
+```
+
+### **Essential Features**
+
+**Quick Progress Widget**
+```typescript
+// Floating action button
+const QuickProgress = () => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="fixed bottom-4 right-4">
+      <CommandPalette />
+    </div>
+  );
+};
+```
+
+**Smart Collections**
+- "Dropping Soon" (no activity 14+ days)
+- "Binge Ready" (completed seasons available)
+- "Almost Done" (>80% complete)
+- "Hidden Gems" (high rated, low popularity)
+
+**Import Sources**
+- Browser bookmarks
+- Netflix viewing history
+- MAL/AniList XML
+- Goodreads CSV
+- Plain text lists
+
+**Notification System**
+```typescript
+// Web Push API
+- New episodes available
+- Friends completed same series
+- Achievement unlocked
+- Weekly summary
+```
+
+**Performance Optimizations**
+```typescript
+// Virtual scrolling for large lists
+npm install @tanstack/react-virtual
+
+// Image CDN with transforms
+const imgProxy = (url, width) => 
+  `https://images.weserv.nl/?url=${url}&w=${width}&h=${width*1.5}&fit=cover`;
+
+// Database indexes
+CREATE INDEX idx_user_status_updated ON media_items(userId, status, updatedAt);
+```
+
+**Social Features**
+- Public profile pages (/user/username)
+- Follow system
+- Activity feed
+- Shared lists
+- Comments on media
+
+**Analytics Dashboard**
+- Heatmap calendar
+- Genre spider chart
+- Velocity trends
+- Platform breakdown
+- Time-of-day patterns
+
+**Mobile PWA**
+```json
+// manifest.json
+{
+  "name": "MediaTracker",
+  "display": "standalone",
+  "theme_color": "#7A1927",
+  "shortcuts": [{
+    "name": "Quick Add",
+    "url": "/add"
+  }]
+}
+```
+
+**Backup System**
+- Auto-backup to Google Drive
+- Version history
+- Restore points
+- Export scheduler
+
+**Discovery Engine**
+- "Because you liked X"
+- Trending in your genres
+- Friends are watching
+- Critic vs User scores
+- Hidden gems algorithm
+
+**Legal Protection**
+- Clear data usage policy
+- No copyrighted images (use official APIs)
+- DMCA compliance
+- User-generated content guidelines
+- Terms of service template
+
+Let me research more specific implementation details and monetization strategies for you.
