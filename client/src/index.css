@@ -28,8 +28,11 @@
   --surface: hsl(0, 0%, 10%);
   --surface-2: hsl(0, 0%, 16%);
   --surface-3: hsl(0, 0%, 22%);
-  --accent-red: hsl(346, 63%, 63%);
-  --primary-red: hsl(346, 63%, 32%);
+  --accent-red: hsl(0, 75%, 55%);
+  --primary-red: hsl(0, 75%, 50%);
+  --red-hover: hsl(0, 75%, 45%);
+  --red-muted: hsl(0, 50%, 35%);
+  --red-light: hsl(0, 65%, 60%);
 }
 
 .dark {

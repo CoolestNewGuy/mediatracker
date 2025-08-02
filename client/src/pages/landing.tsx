@@ -17,7 +17,7 @@ export default function Landing() {
           </p>
           <Button 
             size="lg" 
-            className="text-lg px-8 py-6"
+            className="text-lg px-8 py-6 bg-red-500 hover:bg-red-600 border-red-500 hover:border-red-600"
             onClick={() => window.location.href = '/api/login'}
           >
             Get Started
@@ -26,10 +26,10 @@ export default function Landing() {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          <Card className="border-2 hover:border-accent transition-colors">
+          <Card className="border-2 hover:border-red-500/50 transition-colors">
             <CardHeader>
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
-                <Film className="w-6 h-6 text-accent" />
+              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-4">
+                <Film className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Multiple Media Types</CardTitle>
               <CardDescription>
@@ -38,10 +38,10 @@ export default function Landing() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-accent transition-colors">
+          <Card className="border-2 hover:border-red-500/50 transition-colors">
             <CardHeader>
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
-                <Target className="w-6 h-6 text-accent" />
+              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-4">
+                <Target className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Progress Tracking</CardTitle>
               <CardDescription>
@@ -50,10 +50,10 @@ export default function Landing() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-accent transition-colors">
+          <Card className="border-2 hover:border-red-500/50 transition-colors">
             <CardHeader>
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
-                <Star className="w-6 h-6 text-accent" />
+              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-4">
+                <Star className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Ratings & Reviews</CardTitle>
               <CardDescription>
@@ -62,10 +62,10 @@ export default function Landing() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-accent transition-colors">
+          <Card className="border-2 hover:border-red-500/50 transition-colors">
             <CardHeader>
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
-                <Users className="w-6 h-6 text-accent" />
+              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-4">
+                <Users className="w-6 h-6 text-red-500" />
               </div>
               <CardTitle>Achievement System</CardTitle>
               <CardDescription>
