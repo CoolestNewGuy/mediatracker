@@ -31,3 +31,11 @@ export interface QuickUpdateItem {
   chapter?: number;
   season?: number;
 }
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  unlockedAt?: string;
+}

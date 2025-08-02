@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Grid, List, Search, Filter, Plus, MoreHorizontal, Play, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import type { MediaItem } from "@shared/schema";
 
 interface MediaLibraryProps {
@@ -28,6 +30,9 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
   const [statusFilter, setStatusFilter] = useState("all");
   const [cardSize, setCardSize] = useState<keyof typeof cardSizes>("medium");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (selectedType) {
@@ -47,10 +52,47 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
     }
   });
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/media/${id}`, 'DELETE');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recent'] });
+      toast({
+        title: "Media Deleted",
+        description: "The media item has been successfully deleted.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete media item. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const filteredItems = mediaItems.filter(item => 
     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (item.genre && item.genre.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const handleDelete = (id: string, title: string) => {
+    if (window.confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const handleEdit = (item: MediaItem) => {
+    // TODO: Implement edit functionality
+    toast({
+      title: "Edit Feature",
+      description: "Edit functionality coming soon!",
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -252,11 +294,14 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="bg-surface-2 border-gray-600">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(item)}>
                           <Edit className="w-4 h-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-400">
+                        <DropdownMenuItem 
+                          className="text-red-400"
+                          onClick={() => handleDelete(item.id, item.title)}
+                        >
                           <Trash2 className="w-4 h-4 mr-2" />
                           Delete
                         </DropdownMenuItem>
@@ -354,11 +399,14 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-surface-2 border-gray-600">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEdit(item)}>
                         <Edit className="w-4 h-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-400">
+                      <DropdownMenuItem 
+                        className="text-red-400"
+                        onClick={() => handleDelete(item.id, item.title)}
+                      >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete
                       </DropdownMenuItem>

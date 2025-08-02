@@ -307,6 +307,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete media item
+  app.delete("/api/media/:id", async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteMediaItem(id, DEFAULT_USER_ID);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Media item not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete media error:", error);
+      res.status(500).json({ error: "Failed to delete media item" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
