@@ -1,37 +1,28 @@
-import { Search, Plus, User, Flame, LogOut, ChevronDown } from "lucide-react";
+import { Search, Plus, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { User as UserType } from "@shared/schema";
+import UserProfile from "./UserProfile";
 
 interface HeaderBarProps {
   onAddMedia: () => void;
 }
 
 export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
-  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const typedUser = user as UserType | undefined;
 
   return (
     <header className="bg-surface border-b border-gray-700 px-6 py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-2xl font-bold">Dashboard</h2>
-          <div className="flex items-center space-x-2 bg-surface-2 rounded-lg px-3 py-1">
-            <Flame className="text-[#7A1927] w-4 h-4" />
-            <span className="text-sm font-medium">7 day streak!</span>
+        <div className="flex items-center space-x-6">
+          {/* Logo and Branding */}
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              MediaTracker
+            </h1>
           </div>
         </div>
         
@@ -51,53 +42,14 @@ export default function HeaderBar({ onAddMedia }: HeaderBarProps) {
           {/* Quick Add Button */}
           <Button 
             onClick={onAddMedia}
-            className="bg-[#7A1927] hover:bg-[#9d2332] transition-colors text-white"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Media
           </Button>
           
-          {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="flex items-center space-x-2 bg-surface-2 border-gray-600 hover:bg-surface-3"
-              >
-                <Avatar className="w-6 h-6">
-                  <AvatarImage src={typedUser?.profileImageUrl || ""} />
-                  <AvatarFallback className="bg-[#7A1927] text-white text-xs">
-                    {typedUser?.firstName?.charAt(0) || typedUser?.email?.charAt(0) || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm">
-                  {typedUser?.firstName || typedUser?.email?.split('@')[0] || "User"}
-                </span>
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">
-                    {typedUser?.firstName && typedUser?.lastName 
-                      ? `${typedUser.firstName} ${typedUser.lastName}`
-                      : typedUser?.email?.split('@')[0] || "User"
-                    }
-                  </p>
-                  <p className="text-xs text-muted-foreground">{typedUser?.email}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={() => window.location.href = '/api/logout'}
-                className="text-red-600 focus:text-red-600"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* User Profile */}
+          <UserProfile />
         </div>
       </div>
     </header>

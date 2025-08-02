@@ -3,6 +3,7 @@ import {
   mediaItems, 
   achievements, 
   userStats,
+  dailyLoginRewards,
   type User, 
   type UpsertUser,
   type MediaItem,
@@ -10,7 +11,9 @@ import {
   type Achievement,
   type InsertAchievement,
   type UserStats,
-  type InsertUserStats
+  type InsertUserStats,
+  type DailyLoginReward,
+  type InsertDailyLoginReward
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, and, count, sql } from "drizzle-orm";
@@ -42,6 +45,13 @@ export interface IStorage {
   getUserAchievements(userId: string): Promise<Achievement[]>;
   createAchievement(achievement: InsertAchievement & { userId: string }): Promise<Achievement>;
   checkAndUnlockAchievements(userId: string): Promise<Achievement[]>;
+
+  // Points and Daily Login methods
+  addPoints(userId: string, points: number): Promise<User>;
+  checkAndClaimDailyLogin(userId: string): Promise<{ success: boolean; points: number; day: number }>;
+  getUserPoints(userId: string): Promise<number>;
+  updateUserNickname(userId: string, nickname: string): Promise<User>;
+  getLeaderboard(type: 'points' | 'watched' | 'read', limit?: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -374,6 +384,140 @@ export class DatabaseStorage implements IStorage {
       plannedItems: (stats.byStatus['To Watch'] || 0) + (stats.byStatus['To Read'] || 0),
       droppedItems: stats.byStatus['Dropped'] || 0,
     });
+  }
+
+  // Points and Daily Login methods
+  async addPoints(userId: string, points: number): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        points: sql`COALESCE(points, 0) + ${points}`,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
+  }
+
+  async checkAndClaimDailyLogin(userId: string): Promise<{ success: boolean; points: number; day: number }> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error('User not found');
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Check if already claimed today
+    if (user.lastLoginDate) {
+      const lastLogin = new Date(user.lastLoginDate);
+      const lastLoginDay = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate());
+      
+      if (lastLoginDay.getTime() === today.getTime()) {
+        return { success: false, points: 0, day: 0 };
+      }
+    }
+
+    // Calculate day in the weekly cycle (1-7)
+    let currentDay = ((user.loginStreak || 0) % 7) + 1;
+    
+    // Daily points schedule: 20, 30, 50, 100, 150, 200, 300
+    const pointsSchedule = [20, 30, 50, 100, 150, 200, 300];
+    const pointsToday = pointsSchedule[currentDay - 1];
+
+    // Update user with new login info
+    await db
+      .update(users)
+      .set({
+        lastLoginDate: today,
+        loginStreak: (user.loginStreak || 0) + 1,
+        points: sql`COALESCE(points, 0) + ${pointsToday}`,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+
+    // Record the daily login reward
+    await db.insert(dailyLoginRewards).values({
+      userId,
+      day: currentDay,
+      pointsEarned: pointsToday
+    });
+
+    return { success: true, points: pointsToday, day: currentDay };
+  }
+
+  async getUserPoints(userId: string): Promise<number> {
+    const user = await this.getUser(userId);
+    return user?.points || 0;
+  }
+
+  async updateUserNickname(userId: string, nickname: string): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ nickname, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
+  }
+
+  async getLeaderboard(type: 'points' | 'watched' | 'read', limit: number = 10): Promise<any[]> {
+    if (type === 'points') {
+      const topUsers = await db
+        .select({
+          userId: users.id,
+          nickname: users.nickname,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          points: users.points
+        })
+        .from(users)
+        .orderBy(desc(users.points))
+        .limit(limit);
+      
+      return topUsers.map((user, index) => ({
+        rank: index + 1,
+        ...user,
+        displayName: user.nickname || user.firstName || 'Anonymous'
+      }));
+    } else {
+      // For watched/read leaderboards, we need to count completed items
+      const statusFilter = type === 'watched' 
+        ? ['Watched', 'Completed'] 
+        : ['Read'];
+      
+      const leaderboardData = await db
+        .select({
+          userId: mediaItems.userId,
+          completedCount: count(mediaItems.id)
+        })
+        .from(mediaItems)
+        .where(sql`${mediaItems.status} = ANY(${statusFilter})`)
+        .groupBy(mediaItems.userId)
+        .orderBy(desc(count(mediaItems.id)))
+        .limit(limit);
+
+      // Get user details
+      const userIds = leaderboardData.map(entry => entry.userId);
+      const userDetails = await db
+        .select()
+        .from(users)
+        .where(sql`${users.id} = ANY(${userIds})`);
+      
+      const userMap = new Map(userDetails.map(user => [user.id, user]));
+      
+      return leaderboardData.map((entry, index) => {
+        const user = userMap.get(entry.userId);
+        return {
+          rank: index + 1,
+          userId: entry.userId,
+          nickname: user?.nickname,
+          firstName: user?.firstName,
+          lastName: user?.lastName,
+          profileImageUrl: user?.profileImageUrl,
+          displayName: user?.nickname || user?.firstName || 'Anonymous',
+          completedCount: Number(entry.completedCount)
+        };
+      });
+    }
   }
 }
 

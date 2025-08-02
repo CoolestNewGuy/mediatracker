@@ -1,4 +1,4 @@
-import { Film, TvIcon, Book, BookOpen, Heart, PlayCircle, Plus, Search, Library, Clock, Trophy, Settings, Download, ChartLine, Grid } from "lucide-react";
+import { Film, TvIcon, Book, BookOpen, Heart, PlayCircle, Plus, Search, Library, Clock, Trophy, Settings, Download, ChartLine, Grid, Sparkles } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import type { MediaStats } from "@/lib/types";
 
@@ -27,12 +27,12 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
       {/* Logo/Header */}
       <div className="p-6 border-b border-gray-700">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-[#7A1927] rounded-lg flex items-center justify-center">
-            <Film className="text-white text-lg" />
+          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <Sparkles className="text-white text-lg" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Media Tracker</h1>
-            <p className="text-xs text-gray-400">Complete Media Manager</p>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">MediaTracker</h1>
+            <p className="text-xs text-gray-400">Track Everything You Love</p>
           </div>
         </div>
       </div>
@@ -100,26 +100,15 @@ export default function Sidebar({ stats, onAddMedia, onQuickUpdate, onViewCatalo
 
         {/* Quick Actions */}
         <div className="mt-6">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Browse</h3>
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Quick Actions</h3>
           <div className="space-y-1">
             <button 
-              onClick={onViewCatalog}
-              className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200"
-            >
-              <Grid size={16} />
-              <span>View Catalog</span>
-            </button>
-            <button 
               onClick={onQuickUpdate}
-              className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200"
+              className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 w-full text-left hover:bg-surface-2 hover:border-l-4 hover:border-purple-500 transition-all duration-200"
             >
               <Clock size={16} />
               <span>Quick Update</span>
             </button>
-            <a href="#" className="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-surface-2 hover:border-l-4 hover:border-red-500 transition-all duration-200">
-              <Trophy size={16} />
-              <span>Achievements</span>
-            </a>
           </div>
         </div>
 
