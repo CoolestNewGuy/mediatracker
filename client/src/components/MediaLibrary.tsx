@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { MediaItem } from "@shared/schema";
+import EditMediaModal from "@/components/EditMediaModal";
 
 interface MediaLibraryProps {
   onAddMedia: () => void;
@@ -86,12 +87,17 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
     }
   };
 
+  const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   const handleEdit = (item: MediaItem) => {
-    // TODO: Implement edit functionality
-    toast({
-      title: "Edit Feature",
-      description: "Edit functionality coming soon!",
-    });
+    setEditingItem(item);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditingItem(null);
+    setIsEditModalOpen(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -418,6 +424,13 @@ export default function MediaLibrary({ onAddMedia, selectedType }: MediaLibraryP
           ))}
         </div>
       )}
+
+      {/* Edit Modal */}
+      <EditMediaModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditClose}
+        mediaItem={editingItem}
+      />
     </div>
   );
 }

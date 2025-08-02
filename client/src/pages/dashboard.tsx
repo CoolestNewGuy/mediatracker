@@ -6,6 +6,8 @@ import StatsCards from "@/components/StatsCards";
 import RecentMediaList from "@/components/RecentMediaList";
 import CurrentlyActive from "@/components/CurrentlyActive";
 import MediaCatalog from "@/components/MediaCatalog";
+import StatsOverview from "@/components/StatsOverview";
+import CatalogPreview from "@/components/CatalogPreview";
 import AchievementWidget from "@/components/AchievementWidget";
 import AddMediaModal from "@/components/AddMediaModal";
 import QuickUpdateSidebar from "@/components/QuickUpdateSidebar";
@@ -95,7 +97,7 @@ export default function Dashboard() {
                 onQuickUpdate={() => setIsQuickUpdateOpen(true)}
               />
 
-              <RandomPicker />
+              <CatalogPreview onOpenCatalog={() => setIsCatalogOpen(true)} />
 
               <AchievementWidget 
                 achievements={achievements} 
